@@ -1,6 +1,6 @@
 # Property Map
 
-A shared notebook for two people buying a house together. Every place you are
+A shared notebook for property hunting. Every place you are
 considering goes on one map. Each of you scores it, you both comment, you add
 your own photos and documents, and you plan the visits. The listing sites only
 let you look at adverts. This is for deciding between them.
