@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajouter à Property Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Chivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --h:32;
+  --paper:oklch(0.981 0.004 var(--h)); --surface:oklch(0.996 0.002 var(--h));
+  --sunk:oklch(0.955 0.007 var(--h)); --ink:oklch(0.185 0.016 var(--h));
+  --ink-2:oklch(0.415 0.014 var(--h)); --ink-3:oklch(0.500 0.012 var(--h));
+  --rule:oklch(0.892 0.008 var(--h)); --accent:oklch(0.515 0.158 var(--h));
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:oklch(0.165 0.013 var(--h)); --surface:oklch(0.205 0.014 var(--h));
+  --sunk:oklch(0.140 0.012 var(--h)); --ink:oklch(0.955 0.008 var(--h));
+  --ink-2:oklch(0.780 0.012 var(--h)); --ink-3:oklch(0.660 0.014 var(--h));
+  --rule:oklch(0.310 0.014 var(--h)); --accent:oklch(0.700 0.145 var(--h));
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:400 0.9375rem/1.6 "Chivo","Helvetica Neue",sans-serif;
+  padding:clamp(24px,6vw,64px) clamp(16px,5vw,24px);}
+main{max-width:62ch;margin:0 auto}
+h1{font-family:"Bodoni Moda",Georgia,serif;font-weight:400;font-size:2.25rem;
+   line-height:1.05;letter-spacing:-.015em;margin:0 0 8px}
+p{color:var(--ink-2);margin:0 0 16px}
+h2{font-size:0.75rem;font-weight:600;color:var(--ink-3);margin:32px 0 8px}
+ol{padding-left:1.2em;color:var(--ink-2)} li{margin-bottom:8px}
+.drag{display:inline-block;margin:8px 0 4px;padding:11px 20px;border-radius:6px;
+  background:var(--accent);color:oklch(0.99 0.01 var(--h));font-weight:600;
+  text-decoration:none;cursor:grab;box-shadow:0 1px 1px oklch(0 0 0/.08),0 3px 6px -2px oklch(0 0 0/.18)}
+.note{background:var(--sunk);border-radius:6px;padding:12px 16px;font-size:0.8125rem;color:var(--ink-2)}
+code{font-size:0.8125rem;background:var(--sunk);padding:1px 5px;border-radius:3px}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Ajouter &agrave; Property Map</h1>
+  <p>Un bouton &agrave; garder dans la barre de favoris. Sur une annonce SeLoger,
+     Leboncoin ou Belles Demeures, un clic lit la page et ouvre la fiche pr&eacute;-remplie.</p>
+
+  <p class="note" id="version-note" style="margin-bottom:24px">
+    <b>Version&nbsp;<span id="bmv">6</span>.</b> Un bookmarklet embarque son propre code&nbsp;: quand il change,
+    il faut refaire glisser le bouton. Property Map te pr&eacute;viendra si ta version est
+    en retard &mdash; inutile de v&eacute;rifier de toi-m&ecirc;me.
+  </p>
+
+  <h2>Installation</h2>
+  <ol>
+    <li>Affiche la barre de favoris : <code>&#8984;&#8679;B</code> (Chrome, Mac).</li>
+    <li>Fais glisser ce bouton dessus :</li>
+  </ol>
+  <p><a class="drag" href="javascript:(function(){var H=location.host,D=document,t=D.title||&#x27;&#x27;,o={},body=D.body?D.body.innerText:&#x27;&#x27;;var num=function(s){s=(s||&#x27;&#x27;).replace(/[  \s.]/g,&#x27;&#x27;);var m=s.match(/\d+/);return m?+m[0]:null};var dnum=function(s){s=(s||&#x27;&#x27;).replace(/[  \s]/g,&#x27;&#x27;).replace(&#x27;,&#x27;,&#x27;.&#x27;);var m=s.match(/\d+(?:\.\d+)?/);return m?Math.round(parseFloat(m[0])):null};o.v=6;var LET=function(s){s=(s||&#x27;&#x27;).trim().toUpperCase();return /^[A-G]$/.test(s)?s:null};var TERR=function(){var m=body.match(/([\d][\d\s  .]{0,12})\s*m²\s*de\s*terrain/i);if(!m)return null;var n=parseInt(m[1].replace(/[\s  .]/g,&#x27;&#x27;),10);return isFinite(n)&amp;&amp;n&gt;0?n:null};o.url=location.href.split(&#x27;?&#x27;)[0];var og=D.querySelector(&#x27;meta[property=&quot;og:image&quot;]&#x27;);o.photo=og?og.content.split(&#x27;?&#x27;)[0]:&#x27;&#x27;;var html=D.documentElement.innerHTML;var all=html.match(/https:\/\/(?:v\.seloger\.com|mms\.seloger\.com|img\.leboncoin\.fr)\/[A-Za-z0-9\/\-_]+\.(?:jpg|jpeg|webp)/gi)||[];var best={},order=[];all.forEach(function(u){var id=u.split(&#x27;/&#x27;).pop();var w=u.match(/\/s\/width\/(\d+)/),c=u.match(/\/s\/crop\/(\d+)x(\d+)/);var sc=w?100000+(+w[1]):(c?(+c[1])*(+c[2])/1000:50000);if(!(id in best)){best[id]={u:u,sc:sc};order.push(id)}else if(sc&gt;best[id].sc){best[id]={u:u,sc:sc}}});var list=order.map(function(id){return best[id].u});var dec=(body.match(/(\d{1,3})\s*photos/i)||[])[1];if(dec&amp;&amp;+dec&gt;0&amp;&amp;+dec&lt;list.length)list=list.slice(0,+dec);o.gallery=list.slice(0,60);if(/seloger|bellesdemeures/.test(H)){var m1=t.match(/\b(\d{1,4}(?:[.,]\d+)?)\s*m²/);if(m1)o.surface=dnum(m1[1]);var p1=t.match(/\b(\d[\d\s .]{3,12})\s*€/);if(p1)o.price=num(p1[1]);var r1=t.match(/T(\d+)/);if(r1)o.rooms=+r1[1];o.terrain=TERR();var hs=[].slice.call(D.querySelectorAll(&#x27;h3&#x27;));var pick=function(rx){var h=hs.filter(function(x){return rx.test(x.textContent||&#x27;&#x27;)})[0];if(!h)return null;var b=(h.parentElement||D).querySelector(&#x27;[data-testid=&quot;cdp-preview-scale-highlighted&quot;]&#x27;);return b?LET(b.textContent):null};o.dpe=pick(/performance\s+énerg/i);o.ges=pick(/gaz\s+à\s+effet/i);if(!o.dpe||!o.ges){[].forEach.call(D.querySelectorAll(&#x27;.diagnosticBoxActive&#x27;),function(e){var mm=String(e.className).match(/\b(dpe|ges)([A-G])\b/);if(mm)o[mm[1]]=mm[2];})}o.kind=/terrain/i.test(t)?&#x27;land&#x27;:&#x27;property&#x27;;}else if(/leboncoin/.test(H)){var d=D.querySelector(&#x27;script#__NEXT_DATA__&#x27;);if(d){try{var s=d.textContent;var pp=s.match(/&quot;price&quot;:\[(\d+)\]/);if(pp)o.price=+pp[1];var sq=s.match(/&quot;key&quot;:&quot;square&quot;,&quot;value&quot;:&quot;(\d+)&quot;/);if(sq)o.surface=+sq[1];var ro=s.match(/&quot;key&quot;:&quot;rooms&quot;,&quot;value&quot;:&quot;(\d+)&quot;/);if(ro)o.rooms=+ro[1];var la=s.match(/&quot;key&quot;:&quot;land_plot_surface&quot;,&quot;value&quot;:&quot;(\d+)&quot;/);if(la)o.terrain=+la[1];var en=s.match(/&quot;key&quot;:&quot;energy_rate&quot;,&quot;value&quot;:&quot;([a-gA-G])&quot;/);if(en)o.dpe=LET(en[1]);var ge=s.match(/&quot;key&quot;:&quot;ges&quot;,&quot;value&quot;:&quot;([a-gA-G])&quot;/);if(ge)o.ges=LET(ge[1]);}catch(e){}}o.kind=/terrain/i.test(t)?&#x27;land&#x27;:&#x27;property&#x27;;}else{var p2=body.match(/([\d\s .]{6,})\s*€/);if(p2)o.price=num(p2[1]);}var a=body.match(/\b(\d{5})\s+([A-ZÀ-Ü][A-Za-zÀ-ÿ&#x27;\- ]{2,40})/);if(a){o.address=a[0].trim();o.town=a[2].trim();}o.name=(o.address||t).slice(0,80);if(!o.gallery.length&amp;&amp;!o.price&amp;&amp;!o.address){if(!confirm(&quot;Rien n&#x27;a pu être lu sur cette page. Ouvrir le formulaire vide ?&quot;))return;}window.open(&#x27;https://APP_ORIGIN/#add=&#x27;+encodeURIComponent(JSON.stringify(o)),&#x27;pm&#x27;,&#x27;width=470,height=820&#x27;);})();">Ajouter &agrave; Property Map</a></p>
+  <ol start="3">
+    <li>Ouvre une annonce, puis clique le favori.</li>
+    <li>V&eacute;rifie les champs, place le point si besoin, enregistre.</li>
+  </ol>
+
+  <h2>Ce qui est lu automatiquement</h2>
+  <p>Prix, surface, nombre de pi&egrave;ces, <b>toutes les photos</b> (en pleine largeur, sans doublons), adresse et commune quand
+     la page les expose, et le lien de l&rsquo;annonce. Le reste se compl&egrave;te &agrave; la main.</p>
+
+  <h2>Sur un bien d&eacute;j&agrave; dans la liste</h2>
+  <p>Si le lien correspond &agrave; un bien existant, Property Map le reconna&icirc;t et propose de le
+     <b>mettre &agrave; jour</b> plut&ocirc;t que d&rsquo;en cr&eacute;er un double &mdash; c&rsquo;est ainsi qu&rsquo;on
+     r&eacute;cup&egrave;re les photos d&rsquo;une annonce ajout&eacute;e &agrave; la main.</p>
+
+  <div class="note">
+    Le bouton lit uniquement la page ouverte, dans ton navigateur &mdash; c&rsquo;est
+    pour &ccedil;a qu&rsquo;il fonctionne l&agrave; o&ugrave; un serveur se ferait bloquer.
+    Si un site change sa mise en page, certains champs arriveront vides&nbsp;: la fiche
+    s&rsquo;ouvre quand m&ecirc;me, il suffit de les taper.
+  </div>
+
+  <p style="margin-top:32px"><a href="./">&larr; Retour &agrave; la carte</a></p>
+</main>
+<script>
+  // The number above is the one thing on this page that can lie: it used to be
+  // typed by hand and was left behind when the button changed. Read it off the
+  // button's own code instead.
+  (function () {
+    var a = document.querySelector('a.drag');
+    var m = a && a.getAttribute('href').match(/o\.v=(\d+)/);
+    if (m) document.getElementById('bmv').textContent = m[1];
+    // The button opens the app it was installed from, whatever its address.
+    if (a) a.setAttribute('href', a.getAttribute('href').split('https://APP_ORIGIN').join(location.origin));
+  })();
+</script>
+</body>
+</html>

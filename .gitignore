@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+.env
+.env.*
+
+# Your deployment: account details, the CloudFront -> Lambda shared secret,
+# and everything provision.sh generates. None of it belongs in git.
+infra/config.sh
+infra/.origin-secret
+infra/.state
+infra/.generated/

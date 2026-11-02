@@ -1,0 +1,1855 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f3f0">
+<title>Property Map</title>
+<link rel="manifest" href="manifest.webmanifest">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   Les biens — dark, photo-forward, decisive.
+
+   Cool near-black neutrals so the photography is the only warm thing on
+   screen. Two hot accents carry all the meaning: coral for money and
+   action, gold for how much you like it — you should never confuse the
+   two at a glance. Big soft shapes, heavy type, nothing timid.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --n: 285;         /* neutral cast: cool, so warm accents sing against it */
+  --h: 20;          /* coral — price, primary action */
+  --ha: 85;         /* gold — ratings only */
+
+  --paper:    oklch(0.165 0.014 var(--n));
+  --surface:  oklch(0.215 0.016 var(--n));
+  --raised:   oklch(0.268 0.018 var(--n));
+  --sunk:     oklch(0.128 0.012 var(--n));
+  --ink:      oklch(0.980 0.004 var(--n));
+  --ink-2:    oklch(0.800 0.010 var(--n));
+  --ink-3:    oklch(0.650 0.012 var(--n));
+  --rule:     oklch(0.325 0.018 var(--n));
+  --rule-2:   oklch(0.255 0.015 var(--n));
+
+  --accent:   oklch(0.660 0.225 var(--h));
+  --accent-2: oklch(0.820 0.160 var(--ha));
+  --accent-q: oklch(0.300 0.080 var(--h));
+  --on-accent: oklch(0.145 0.030 var(--h));
+  --gold:   oklch(0.820 0.150 85); --on-gold: oklch(0.240 0.060 80);
+  --gold-ink: oklch(0.820 0.150 85);   /* gold as text: brightest that reads on paper */
+  --silver: oklch(0.860 0.010 260);
+  --bronze: oklch(0.680 0.110 55); --on-bronze: oklch(0.985 0.010 55);
+
+  --b1: oklch(0.880 0.085 var(--h));
+  --b2: oklch(0.800 0.145 var(--h));
+  --b3: oklch(0.715 0.200 var(--h));
+  --b4: oklch(0.615 0.230 var(--h));
+  --b5: oklch(0.500 0.200 var(--h));
+  --b1-on: oklch(0.17 0.04 var(--h)); --b2-on: oklch(0.16 0.04 var(--h));
+  --b3-on: oklch(0.15 0.04 var(--h)); --b4-on: oklch(0.985 0.01 var(--h));
+  --b5-on: oklch(0.985 0.01 var(--h));
+  --nodata: oklch(0.560 0.016 var(--n));
+
+  --alex: oklch(0.730 0.155 250);
+  --sam:  oklch(0.780 0.155 155);
+  --visit:  oklch(0.640 0.165 150); --on-visit: oklch(0.990 0.010 150);
+  --guest:     oklch(0.790 0.130 320);
+
+  --display: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+  --ui: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+
+  --s-2:4px; --s-1:8px; --s0:12px; --s1:16px; --s2:24px; --s3:32px; --s4:48px;
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-xl:28px; --r-pill:999px;
+
+  --shadow-1: 0 1px 2px oklch(0 0 0 / .5);
+  --shadow-2: 0 1px 2px oklch(0 0 0 / .5), 0 6px 12px -4px oklch(0 0 0 / .6);
+  color-scheme: dark;
+}
+
+/* Light stays for bright daylight outside a house; it is not the default. */
+:root[data-theme="light"]{
+  --paper:    oklch(0.985 0.003 var(--n));
+  --surface:  oklch(1 0 0);
+  --raised:   oklch(0.972 0.005 var(--n));
+  --sunk:     oklch(0.950 0.007 var(--n));
+  --ink:      oklch(0.180 0.018 var(--n));
+  --ink-2:    oklch(0.400 0.014 var(--n));
+  --ink-3:    oklch(0.490 0.012 var(--n));
+  --rule:     oklch(0.885 0.008 var(--n));
+  --rule-2:   oklch(0.935 0.006 var(--n));
+  --accent:   oklch(0.560 0.215 var(--h));
+  --accent-2: oklch(0.620 0.150 var(--ha));
+  --gold-ink: oklch(0.520 0.120 75);
+  --accent-q: oklch(0.955 0.030 var(--h));
+  --on-accent: oklch(0.99 0.01 var(--h));
+  --b3-on: oklch(0.99 0.01 var(--h));
+  --b4-on: oklch(0.99 0.01 var(--h));
+  --b5-on: oklch(0.99 0.01 var(--h));
+  --nodata: oklch(0.655 0.014 var(--n));
+  --alex: oklch(0.510 0.160 250);
+  --sam:  oklch(0.480 0.150 155);
+  --shadow-1: 0 1px 2px oklch(0.18 0.02 var(--n) / .08);
+  --shadow-2: 0 1px 2px oklch(0.18 0.02 var(--n) / .10), 0 6px 12px -4px oklch(0.18 0.02 var(--n) / .20);
+  color-scheme: light;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font:450 0.9375rem/1.5 var(--ui); font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+  letter-spacing:-.006em;
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:var(--r-sm)}
+button{font:inherit; color:inherit}
+
+/* ─────────────── login ─────────────── */
+.gate{
+  position:fixed; inset:0; z-index:5000; background:var(--paper);
+  display:grid; place-items:center; padding:var(--s2);
+}
+.gate[hidden]{display:none}
+.gate__card{width:100%; max-width:400px}
+.gate h1{
+  font-family:var(--display); font-optical-sizing:auto; font-weight:400;
+  font-size:2.5rem; line-height:1.02; letter-spacing:-.015em; margin:0;
+}
+.gate p{margin:var(--s0) 0 var(--s3); color:var(--ink-2); font-size:0.875rem; max-width:38ch}
+.who{display:grid; grid-template-columns:1fr 1fr; gap:var(--s0); margin-bottom:var(--s1)}
+.who button{
+  padding:var(--s0); background:var(--surface); border:1px solid var(--rule);
+  border-radius:4px; cursor:pointer; text-align:left; transition:border-color .16s, background .16s;
+}
+.who button:hover{border-color:var(--ink-3)}
+.who button[aria-pressed="true"]{border-color:var(--who); background:var(--accent-q)}
+.who b{
+  display:block; font-family:var(--display); font-optical-sizing:auto;
+  font-weight:400; font-size:1.25rem; line-height:1.1;
+}
+.who span{font-size:0.6875rem; color:var(--ink-3)}
+.who button[aria-pressed="true"] span{color:var(--who)}
+.gate label{display:block; font-size:0.6875rem; font-weight:500; color:var(--ink-3); margin-bottom:var(--s-1)}
+.gate input{
+  width:100%; padding:10px var(--s0); border:1px solid var(--rule); border-radius:4px;
+  background:var(--surface); color:var(--ink); font:400 1rem var(--ui);
+}
+.gate input:focus{outline:none; border-color:var(--accent)}
+.gate__go{
+  width:100%; margin-top:var(--s0); padding:11px; border:none; border-radius:4px;
+  background:var(--accent); color:var(--on-accent); font-weight:800;
+  font-size:0.875rem; cursor:pointer;
+}
+.gate__go:disabled{opacity:.45; cursor:not-allowed}
+.gate__err{
+  margin-top:var(--s0); font-size:0.75rem; color:var(--accent); min-height:1.2em;
+}
+
+/* ─────────────── shell ─────────────── */
+.app{
+  display:grid; grid-template-columns:minmax(340px, 1fr) minmax(0, 2fr); height:100dvh;
+  transition:grid-template-columns .3s cubic-bezier(.16,.84,.30,1);
+}
+/* collapsed: the rail folds away and the map takes the whole window */
+.app.railed{grid-template-columns:0 minmax(0, 1fr)}
+.app.railed .rail{
+  overflow:hidden; border-right-color:transparent;
+  pointer-events:none; opacity:0;
+  transition:opacity .18s;
+}
+@media (prefers-reduced-motion:reduce){
+  .app, .app.railed .rail{transition:none}
+}
+
+/* Solid ink against a deliberately pale map: at 26px of near-white on
+   near-white it was invisible, which is the one thing a control that hides
+   half the interface must not be. */
+.rail-toggle{
+  position:absolute; left:0; top:50%; z-index:1250;
+  transform:translate(-50%, -50%);
+  width:30px; height:62px; border-radius:99px;
+  display:grid; place-items:center; cursor:pointer;
+  background:var(--ink); border:2px solid var(--paper); color:var(--paper);
+  font-size:1.125rem; font-weight:600; line-height:1;
+  box-shadow:0 2px 4px oklch(0 0 0 / .2), 0 6px 16px -6px oklch(0 0 0 / .35);
+  transition:background .16s, transform .18s cubic-bezier(.16,.84,.30,1);
+}
+.rail-toggle:hover{background:var(--accent)}
+.rail-toggle:active{transform:translate(-50%, -50%) scale(.94)}
+.railed .rail-toggle{transform:translate(10px, -50%)}
+.railed .rail-toggle:active{transform:translate(10px, -50%) scale(.94)}
+.app[hidden]{display:none}
+.rail{grid-area:1 / 1; display:flex; flex-direction:column; min-height:0;
+  background:var(--paper); border-right:1px solid var(--rule); position:relative; z-index:600}
+.map-wrap{grid-area:1 / 2; position:relative; min-width:0}
+.grip{display:none}
+
+/* The masthead earns its height or gives it back: the list is the point.
+   Title and figures on the left, the tools beside them as soon as the rail
+   is wide enough to take both. */
+.masthead{padding:var(--s0) var(--s1) var(--s-1); position:relative}
+.mast__row{display:grid; gap:var(--s-1)}
+.mast__id{min-width:0}
+h1{
+  margin:0; font-family:var(--display); font-optical-sizing:auto;
+  font-size:1.5rem; font-weight:800; line-height:1; letter-spacing:-.035em;
+}
+.standfirst{margin:3px 0 0; max-width:42ch; font-size:0.75rem; line-height:1.35; color:var(--ink-3)}
+.standfirst b{font-weight:700; color:var(--ink-2)}
+
+.mast__tools{display:flex; gap:6px; align-items:center}
+.mast__tools .me{margin-left:auto}
+@media (min-width:1200px){
+  .mast__row{grid-template-columns:auto minmax(0, 1fr); align-items:center}
+  .mast__tools{justify-content:flex-end}
+  .standfirst{max-width:28ch}
+}
+.icon-btn{
+  width:32px; height:32px; border-radius:50%; cursor:pointer; background:var(--raised);
+  border:1px solid var(--rule); color:var(--ink-2); display:grid; place-items:center;
+  font-size:0.875rem; line-height:1;
+  transition:color .16s, border-color .16s, transform .16s;
+}
+.icon-btn:hover{color:var(--ink); border-color:var(--ink-3)}
+.icon-btn:active{transform:scale(.92)}
+.me{
+  font-size:0.6875rem; font-weight:700; color:var(--on-accent);
+  border:none; border-radius:var(--r-pill); padding:7px 12px; cursor:pointer;
+  background:var(--who); transition:transform .16s;
+}
+.me:active{transform:scale(.94)}
+
+/* ─────────────── filters ─────────────── */
+.controls{padding:0 var(--s1) var(--s-1); display:grid; gap:var(--s-1)}
+.field{display:grid; gap:var(--s-1)}
+.lab{display:flex; justify-content:space-between; align-items:baseline; gap:var(--s-1);
+     font-size:0.6875rem; line-height:1.2; color:var(--ink-3); font-weight:500}
+.lab b{font-weight:600; color:var(--ink); font-size:0.75rem}
+
+/* the three facets that matter, as plain selects */
+.selects{display:grid; grid-template-columns:1fr 1fr; gap:var(--s-1)}
+.sel{display:grid; gap:2px; min-width:0}
+.sel:last-child{grid-column:1 / -1}
+.sel > span{font-size:0.5625rem; font-weight:700; color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase}
+.sel select{
+  width:100%; padding:8px 28px 8px 11px; border:1px solid var(--rule); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--ink); font:500 0.8125rem var(--ui);
+  cursor:pointer; appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 15px) 55%, calc(100% - 10px) 55%;
+  background-size:5px 5px, 5px 5px; background-repeat:no-repeat;
+  text-overflow:ellipsis;
+}
+.sel select:focus{outline:none; border-color:var(--accent)}
+.sel select:hover{border-color:var(--ink-3)}
+
+/* secondary controls collapse away until wanted */
+.more{border:none; padding:0; margin:0}
+.more > summary{
+  list-style:none; cursor:pointer; font-size:0.6875rem; font-weight:500; color:var(--ink-3);
+  padding:2px 0; display:flex; align-items:center; gap:5px;
+}
+.more > summary::-webkit-details-marker{display:none}
+.more > summary::before{content:"+"; font-size:0.8125rem; line-height:1}
+.more[open] > summary::before{content:"–"}
+.more > summary:hover{color:var(--ink)}
+.more__body{display:grid; gap:var(--s0); padding-bottom:var(--s-1)}
+
+.search{width:100%; padding:12px var(--s1); background:var(--surface); color:var(--ink);
+  border:1px solid var(--rule); border-radius:var(--r-pill); font:450 0.9375rem var(--ui)}
+.search:focus{outline:none; border-color:var(--accent)}
+.search::placeholder{color:var(--ink-3)}
+
+.hist{display:flex; align-items:flex-end; gap:2px; height:30px; margin-bottom:var(--s-2)}
+.hist i{flex:1; background:var(--rule); border-radius:1px 1px 0 0; min-height:2px; transition:background .18s, opacity .18s}
+.hist i.on{background:var(--accent)}
+.hist i.off{opacity:.45}
+
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; background:none; height:18px; margin:0; cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px; background:var(--rule)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:15px; height:15px; margin-top:-6.5px;
+  border-radius:50%; background:var(--accent); border:2.5px solid var(--paper); box-shadow:0 0 0 1px var(--accent)}
+input[type=range]::-moz-range-track{height:2px; background:var(--rule)}
+input[type=range]::-moz-range-thumb{width:15px; height:15px; border-radius:50%; background:var(--accent);
+  border:2.5px solid var(--paper); box-shadow:0 0 0 1px var(--accent)}
+
+.sorts{display:flex; gap:6px; align-items:center; flex-wrap:wrap}
+.sorts button{background:var(--surface); border:1px solid var(--rule); padding:7px 13px;
+  border-radius:var(--r-pill); cursor:pointer; font-size:0.75rem; font-weight:700;
+  color:var(--ink-3); transition:color .16s, background .16s, border-color .16s}
+.sorts button:hover{color:var(--ink)}
+.sorts button[aria-pressed="true"]{color:var(--on-accent); background:var(--accent); border-color:var(--accent)}
+
+/* ─────────────── list ─────────────── */
+.list{flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  margin:0; padding:0; list-style:none; border-top:1px solid var(--rule);
+  content-visibility:auto;
+}
+.list::-webkit-scrollbar{width:10px}
+.list::-webkit-scrollbar-thumb{background:var(--rule); border:3.5px solid var(--paper); border-radius:10px}
+
+/* ─── the card ───
+   A row, not a poster. The photograph is the smallest thing that still
+   tells you which house this is; everything you compare — price, what the
+   two of us gave it, the surfaces — reads down the right in one column, so
+   sixty-three of them scroll past in a quarter of the screen each. */
+.list{padding:var(--s-1) var(--s-1) var(--s3); display:grid; gap:var(--s-1)}
+.card{
+  display:grid; grid-template-columns:116px minmax(0, 1fr); gap:var(--s0);
+  width:100%; padding:var(--s-1); border:none; background:var(--surface);
+  border-radius:var(--r-md); cursor:pointer; text-align:left; align-items:center;
+  box-shadow:var(--shadow-1);
+  transition:transform .18s cubic-bezier(.16,.84,.30,1), box-shadow .18s, background .18s;
+  contain:layout style;
+}
+.card:hover{transform:translateY(-2px); box-shadow:var(--shadow-2); background:var(--raised)}
+.card:active{transform:translateY(0) scale(.995)}
+.card[aria-current="true"]{outline:2px solid var(--accent); outline-offset:-2px}
+@media (prefers-reduced-motion:reduce){ .card, .card:hover{transform:none} }
+
+.card__ph{position:relative; display:block; border-radius:var(--r-sm); overflow:hidden}
+.thumb{
+  width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:var(--sunk);
+}
+/* the podium medal rides the corner of the photograph */
+.card__ph .rank{
+  top:4px; left:4px; right:auto; width:19px; height:19px;
+  font-size:0.625rem; border-width:1.5px;
+}
+.tag{
+  position:absolute; left:4px; bottom:4px; z-index:2;
+  font-size:0.5625rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+  line-height:1; color:oklch(0.97 0.005 var(--n)); border:none;
+  background:oklch(0.12 0.012 var(--n) / .74); backdrop-filter:blur(6px);
+  border-radius:var(--r-pill); padding:4px 7px;
+}
+.tag--land{background:var(--accent-2); color:var(--on-accent)}
+.tag--gone{background:oklch(0.12 0.012 var(--n) / .74); opacity:.85}
+/* Sold is not a failure state, it is a fact: a flat slate badge that reads
+   at a glance without competing with terrain's accent. */
+.tag--sold{background:oklch(0.52 0.03 var(--n)); color:oklch(0.98 0.004 var(--n))}
+/* The same badge away from a photo corner — beside a name or a price. */
+.tag--inline{
+  position:static; display:inline-block; vertical-align:middle;
+  margin-left:6px; backdrop-filter:none;
+}
+
+.card__text{display:block; min-width:0}
+.card__top{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:var(--s-1); margin-bottom:2px;
+}
+.price{
+  font-family:var(--display); font-optical-sizing:auto;
+  font-size:1.125rem; font-weight:800; line-height:1.1; letter-spacing:-.03em;
+  color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.price--none{
+  font-family:var(--ui); font-size:0.75rem; font-weight:600; letter-spacing:0;
+  color:var(--ink-3);
+}
+/* what the two of us gave it, and the total — initials in our own colours */
+.marks{display:flex; gap:4px; flex:none}
+.mark{
+  display:flex; align-items:center; gap:3px; padding:3px 7px; border-radius:var(--r-pill);
+  background:var(--sunk); font-size:0.625rem; font-weight:800; line-height:1;
+  color:var(--ink-2);
+}
+.mark u{text-decoration:none; font-weight:800; color:var(--who, var(--ink-3))}
+.mark .val{font-variant-numeric:tabular-nums}
+.mark--auto{background:var(--accent-q)}
+.mark--auto u{color:var(--accent-2)}
+.mark--auto .val{color:var(--accent-2)}
+.pips{display:none}
+
+.name{
+  font-family:var(--display); font-optical-sizing:auto; font-size:0.9375rem;
+  font-weight:700; line-height:1.2; letter-spacing:-.015em; color:var(--ink);
+  display:block; margin:0 0 2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.where{
+  display:block; font-size:0.75rem; line-height:1.3; color:var(--ink-3); font-weight:500;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.card__facts{
+  display:block; margin-top:5px; font-size:0.6875rem; font-weight:600; color:var(--ink-2);
+  font-variant-numeric:tabular-nums; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.empty{padding:var(--s4) var(--s2); text-align:center; color:var(--ink-3)}
+.empty h2{font-family:var(--display); font-weight:400; font-size:1.375rem; margin:0 0 var(--s-1); color:var(--ink-2)}
+.empty p{margin:0; font-size:0.8125rem; line-height:1.5}
+.empty button{margin-top:var(--s1); background:none; border:1px solid var(--rule);
+  border-radius:4px; padding:7px var(--s0); cursor:pointer; font-size:0.75rem; font-weight:500}
+
+/* ─────────────── map ─────────────── */
+#map{position:absolute; inset:0; background:var(--sunk)}
+.leaflet-container{font-family:var(--ui); background:var(--sunk)}
+.leaflet-tile{filter:saturate(.16) contrast(.88) brightness(1.06)}
+:root[data-theme="dark"] .leaflet-tile{filter:saturate(.12) brightness(.6) contrast(1.06) invert(.93) hue-rotate(180deg)}
+.leaflet-control-attribution{background:oklch(from var(--paper) l c h / .85) !important;
+  color:var(--ink-3) !important; font:400 0.625rem var(--ui) !important}
+.leaflet-control-attribution a{color:var(--ink-2) !important}
+.leaflet-bar{border:1px solid var(--rule) !important; box-shadow:var(--shadow-1) !important}
+.leaflet-bar a{background:var(--surface) !important; color:var(--ink) !important; border-bottom-color:var(--rule) !important}
+
+.anchor{position:relative; width:0; height:0}
+.chip{position:absolute; left:0; top:0; transform:translate(-50%,-100%);
+  padding:5px 10px 6px; border-radius:var(--r-pill); white-space:nowrap; cursor:pointer;
+  font-size:0.75rem; font-weight:800; line-height:1; letter-spacing:-.01em;
+  border:2px solid var(--paper); box-shadow:var(--shadow-2);
+  transition:transform .22s cubic-bezier(.16,.84,.30,1), opacity .22s, filter .22s}
+.chip::after{content:""; position:absolute; left:50%; bottom:-4px; width:7px; height:7px;
+  background:inherit; border:inherit; border-top:none; border-left:none;
+  transform:translateX(-50%) rotate(45deg)}
+.b1{background:var(--b1); color:var(--b1-on)} .b2{background:var(--b2); color:var(--b2-on)}
+.b3{background:var(--b3); color:var(--b3-on)} .b4{background:var(--b4); color:var(--b4-on)}
+.b5{background:var(--b5); color:var(--b5-on)}
+/* No price yet — still a property, and it has to be findable. An outlined
+   pill with a question mark reads at a glance where a grey dot vanished. */
+.chip--none{
+  padding:4px 10px 5px; min-width:28px; text-align:center;
+  background:var(--ink); color:var(--paper);
+  border:2px solid var(--paper); box-shadow:var(--shadow-2);
+  font-size:0.8125rem; font-weight:800;
+}
+.chip--none::after{background:var(--ink); border-color:var(--paper)}
+.chip--approx{border-style:dashed}
+.chip.mini{padding:0; width:11px; height:11px; border-radius:50%; font-size:0; border-width:1.5px}
+.chip.mini::after{display:none}
+.chip--none.mini{
+  width:13px; height:13px; min-width:0; padding:0;
+  border-width:2.5px; background:var(--surface);
+}
+.anchor:hover .chip{transform:translate(-50%,-100%) scale(1.07)}
+.anchor.on .chip{transform:translate(-50%,-100%) scale(1.13); z-index:3}
+.anchor:hover .chip.mini, .anchor.on .chip.mini{width:14px; height:14px}
+/* a starred property wears a ring so favourites stand out on the map */
+.chip.starred{box-shadow:0 0 0 2.5px var(--accent-q), var(--shadow-1)}
+/* The podium: your three best, by the average of both scores. A gold ring
+   and a numbered medal on the shoulder, so they read at any zoom. */
+.chip.top, .thumbpin.top{box-shadow:0 0 0 3px var(--gold), var(--shadow-2); z-index:2}
+.rank{
+  position:absolute; top:-11px; right:-11px; width:20px; height:20px; border-radius:50%;
+  display:grid; place-items:center; font:800 0.6875rem/1 var(--ui); font-style:normal;
+  background:var(--gold); color:var(--on-gold); border:2px solid var(--paper);
+  box-shadow:var(--shadow-1); letter-spacing:0;
+}
+.rank--2{background:var(--silver); color:var(--on-gold)}
+.rank--3{background:var(--bronze); color:var(--on-bronze)}
+.chip.mini .rank{top:-9px; right:-9px; width:15px; height:15px; font-size:0.5625rem}
+.thumbpin .rank{top:-8px; right:-8px; z-index:2}
+.tag--rank{background:var(--gold); color:var(--on-gold)}
+.tag--rank + .tag{left:calc(var(--s-1) + 58px)}
+/* price alone tells you what it costs; the photo tells you what it is */
+.thumbpin{
+  position:absolute; left:0; top:0; transform:translate(-50%,-100%);
+  width:60px; cursor:pointer; filter:drop-shadow(0 2px 5px oklch(0.185 0.016 var(--h) / .35));
+  transition:transform .2s cubic-bezier(.16,.84,.30,1), opacity .22s;
+}
+/* Painted as a background rather than an <img>: inside the Leaflet marker
+   pane an image's width gets overridden and it reverts to its intrinsic
+   ratio, so it never crops. background-size:cover always does. */
+.thumbpin__ph{
+  display:block; width:60px; height:45px;
+  border:2px solid var(--paper); border-bottom:none;
+  border-radius:4px 4px 0 0; background:var(--sunk);
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+}
+.thumbpin b{
+  display:block; text-align:center; font-size:0.625rem; font-weight:700; line-height:1;
+  padding:3px 2px 4px; border-radius:0 0 4px 4px; border:2px solid var(--paper); border-top:none;
+  font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden;
+}
+.thumbpin::after{
+  content:""; position:absolute; left:50%; bottom:-5px; width:8px; height:8px;
+  transform:translateX(-50%) rotate(45deg); background:inherit;
+}
+.anchor:hover .thumbpin{transform:translate(-50%,-100%) scale(1.08); z-index:4}
+.anchor.on .thumbpin{transform:translate(-50%,-100%) scale(1.14); z-index:5}
+
+/* A visit is booked: the pin's white frame turns green and a calendar sits on
+   its top-left shoulder — the right one belongs to the podium medal. Before
+   the selection rules, so a selected pin still takes the coral. */
+.thumbpin.visit .thumbpin__ph, .thumbpin.visit b, .chip.visit{border-color:var(--visit)}
+.vis{
+  position:absolute; top:-9px; left:-9px; width:19px; height:19px; border-radius:50%;
+  display:grid; place-items:center; z-index:2; text-decoration:none;
+  background:var(--visit); border:2px solid var(--paper); box-shadow:var(--shadow-1);
+}
+.vis svg{width:10px; height:10px; fill:none; stroke:var(--on-visit); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round}
+.vis path:only-child{stroke-width:2}
+.chip .vis{top:-11px; left:-11px}
+.chip.mini .vis{top:-9px; left:-9px; width:15px; height:15px}
+.chip.mini .vis svg{width:8px; height:8px}
+
+/* ── the selected property ──────────────────────────────────────────────
+   Being selected is the loudest state on the map, louder than the podium:
+   the pin grows, takes the coral of the panel it just opened, drops a halo
+   on its own point and sends one ring out so the eye finds it even if it
+   moved under your thumb. Everything else fades back a stop. */
+.map--sel .anchor:not(.sel) .chip,
+.map--sel .anchor:not(.sel) .thumbpin{opacity:.38; filter:saturate(.35)}
+.map--sel .anchor:not(.sel):hover .chip,
+.map--sel .anchor:not(.sel):hover .thumbpin{opacity:.85; filter:none}
+
+.anchor.sel .chip{
+  transform:translate(-50%,-100%) scale(1.34); z-index:6;
+  border-color:var(--accent); box-shadow:0 0 0 3px var(--accent), var(--shadow-2);
+}
+.anchor.sel .chip::after{border-color:var(--accent)}
+.anchor.sel .chip.mini{width:17px; height:17px}
+.anchor.sel .thumbpin{transform:translate(-50%,-100%) scale(1.3); z-index:6}
+.anchor.sel .thumbpin__ph, .anchor.sel .thumbpin b{border-color:var(--accent)}
+
+/* Sold: the pin keeps its shade and its place on the map — what a street went
+   for is the point of leaving it there — but desaturates and strikes its own
+   price, so a live asking price is never confused with a closed one. */
+.chip.sold, .thumbpin.sold{filter:saturate(.35) opacity(.78)}
+.thumbpin.sold{filter:saturate(.35) opacity(.78) drop-shadow(0 2px 5px oklch(0.185 0.016 var(--h) / .35))}
+.chip.sold, .thumbpin.sold b{text-decoration:line-through; text-decoration-thickness:1.5px}
+/* the podium number is not part of the price, so it is not struck with it */
+.chip.sold .rank{text-decoration:none}
+.map--sel .poi{opacity:.5}
+
+/* the halo sits on the point itself, under the pin: ::before paints before
+   the chip, so no z-index is needed to keep it behind */
+.anchor.sel::before{
+  content:""; position:absolute; left:0; top:0; width:96px; height:96px;
+  margin:-48px 0 0 -48px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle,
+    oklch(from var(--accent) l c h / .42) 0%,
+    oklch(from var(--accent) l c h / .14) 45%,
+    oklch(from var(--accent) l c h / 0) 70%);
+}
+.anchor.sel::after{
+  content:""; position:absolute; left:0; top:0; width:28px; height:28px;
+  margin:-14px 0 0 -14px; border-radius:50%; border:2.5px solid var(--accent);
+  pointer-events:none; animation:pin-ring .9s cubic-bezier(.16,.84,.30,1) forwards;
+}
+@keyframes pin-ring{
+  from{transform:scale(.35); opacity:.9}
+  to{transform:scale(4.2); opacity:0}
+}
+@media (prefers-reduced-motion: reduce){ .anchor.sel::after{display:none} }
+.thumbpin.b1 b{background:var(--b1); color:var(--b1-on)}
+.thumbpin.b2 b{background:var(--b2); color:var(--b2-on)}
+.thumbpin.b3 b{background:var(--b3); color:var(--b3-on)}
+.thumbpin.b4 b{background:var(--b4); color:var(--b4-on)}
+.thumbpin.b5 b{background:var(--b5); color:var(--b5-on)}
+.thumbpin.b0 b{background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--rule)}
+
+.key{position:absolute; z-index:700; left:var(--s1); bottom:var(--s2);
+  background:oklch(from var(--paper) l c h / .93); backdrop-filter:blur(6px);
+  border:1px solid var(--rule); border-radius:4px; padding:var(--s0) var(--s1);
+  box-shadow:var(--shadow-1); max-width:min(320px, calc(100% - var(--s3)))}
+.key h2{margin:0 0 var(--s-1); font-size:0.6875rem; font-weight:500; color:var(--ink-3)}
+.key__ramp{display:flex; height:8px; border-radius:2px; overflow:hidden}
+.key__ramp i{flex:1}
+.key__switch{display:flex; gap:2px; margin-bottom:var(--s-1); padding:2px;
+  background:var(--sunk); border-radius:4px}
+.key__switch button{flex:1; padding:4px 8px; border:0; border-radius:3px; cursor:pointer;
+  background:none; color:var(--ink-3); font:500 0.6875rem var(--ui);
+  white-space:nowrap; transition:background .16s, color .16s}
+.key__switch button:hover{color:var(--ink)}
+.key__switch button[aria-current]{background:var(--surface); color:var(--ink);
+  box-shadow:var(--shadow-1)}
+/* the DPE ramp carries its letters, so it needs height and legible type */
+.key__ramp--dpe{height:auto; gap:2px; border-radius:0}
+.key__ramp--dpe i{padding:3px 0; border-radius:2px; text-align:center;
+  font:700 0.625rem/1 var(--ui); font-style:normal}
+
+/* The French energy label, A (sober) to G (ruinous). Official hues, re-tuned
+   in oklch so they sit in this palette instead of shouting over it. */
+.dpe-a{--dpe:oklch(0.760 0.150 152); --dpe-on:oklch(0.22 0.05 152)}
+.dpe-b{--dpe:oklch(0.815 0.155 140); --dpe-on:oklch(0.23 0.05 140)}
+.dpe-c{--dpe:oklch(0.870 0.150 122); --dpe-on:oklch(0.24 0.05 122)}
+.dpe-d{--dpe:oklch(0.900 0.145 100); --dpe-on:oklch(0.25 0.05 100)}
+.dpe-e{--dpe:oklch(0.865 0.135 76);  --dpe-on:oklch(0.25 0.05 76)}
+.dpe-f{--dpe:oklch(0.775 0.150 48);  --dpe-on:oklch(0.22 0.05 48)}
+.dpe-g{--dpe:oklch(0.660 0.190 26);  --dpe-on:oklch(0.99 0.01 26)}
+/* the scale is declared once above; these say who paints with it */
+.chip[class*="dpe-"], .key__ramp--dpe i, .dpebadge[class*="dpe-"]{
+  background:var(--dpe); color:var(--dpe-on)}
+.thumbpin[class*="dpe-"] b{background:var(--dpe); color:var(--dpe-on)}
+
+/* The total mark, five steps, in blue — the one family neither the price
+   ramp (coral) nor the DPE scale (green to red) is using, so a pin's colour
+   is never ambiguous about which question it is answering. Pale for a weak
+   mark, deep for a strong one. Cut on the quintiles of the marks we hold. */
+.n1{--nc:oklch(0.880 0.045 248); --nc-on:oklch(0.26 0.06 248)}
+.n2{--nc:oklch(0.805 0.085 250); --nc-on:oklch(0.24 0.07 250)}
+.n3{--nc:oklch(0.715 0.130 252); --nc-on:oklch(0.22 0.07 252)}
+.n4{--nc:oklch(0.605 0.165 256); --nc-on:oklch(0.98 0.02 256)}
+.n5{--nc:oklch(0.495 0.175 262); --nc-on:oklch(0.99 0.02 262)}
+.chip.n1, .chip.n2, .chip.n3, .chip.n4, .chip.n5,
+.key__ramp i.n1, .key__ramp i.n2, .key__ramp i.n3, .key__ramp i.n4, .key__ramp i.n5{
+  background:var(--nc); color:var(--nc-on);
+}
+.chip.n1::after, .chip.n2::after, .chip.n3::after,
+.chip.n4::after, .chip.n5::after{background:var(--nc)}
+.thumbpin.n1 b, .thumbpin.n2 b, .thumbpin.n3 b,
+.thumbpin.n4 b, .thumbpin.n5 b{background:var(--nc); color:var(--nc-on)}
+.dpe-row{display:flex; gap:var(--s-2); margin:var(--s-1) 0 0}
+.dpebadge{display:inline-flex; align-items:center; gap:5px; padding:3px 8px;
+  border-radius:4px; font:700 0.75rem var(--ui); letter-spacing:.02em}
+.dpebadge b{font:600 0.5625rem var(--ui); letter-spacing:.06em; opacity:.72}
+.key__ends{display:flex; justify-content:space-between; margin-top:5px; font-size:0.6875rem; color:var(--ink-2)}
+.key__none{margin:var(--s-1) 0 0; padding-top:var(--s-1); border-top:1px solid var(--rule-2);
+  display:flex; align-items:center; gap:6px; font-size:0.6875rem; color:var(--ink-3)}
+.key__none i{
+  width:13px; height:13px; border-radius:99px; flex:none;
+  background:var(--surface); border:2px solid var(--ink);
+}
+
+.leaflet-tooltip.tip{background:var(--surface); border:1px solid var(--rule); border-radius:4px;
+  box-shadow:var(--shadow-2); padding:0; width:184px; white-space:normal; color:var(--ink); font-family:var(--ui)}
+.leaflet-tooltip.tip::before{border-top-color:var(--rule)}
+.tip img{width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:var(--sunk)}
+.tip b{display:block; padding:var(--s-1) var(--s-1) 1px; font-family:var(--display);
+  font-optical-sizing:auto; font-weight:400; font-size:0.875rem; line-height:1.2}
+.tip span{display:block; padding:0 var(--s-1) var(--s-1); font-size:0.6875rem; color:var(--ink-3)}
+@media (hover:none){ .leaflet-tooltip.tip{display:none} }
+
+/* ─────────────── detail panel (replaces the popup) ─────────────── */
+.sheet{
+  position:absolute; z-index:800; top:0; right:0; bottom:0; width:min(400px, 100%);
+  background:var(--surface); border-left:1px solid var(--rule); box-shadow:var(--shadow-2);
+  display:flex; flex-direction:column; transform:translateX(100%);
+  transition:transform .32s cubic-bezier(.16,.84,.30,1);
+}
+.sheet.open{transform:none}
+@media (prefers-reduced-motion:reduce){ .sheet{transition:none} }
+.sheet__scroll{overflow-y:auto; flex:1; min-height:0}
+.sheet__close{position:absolute; top:var(--s0); right:var(--s0); z-index:2;
+  width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;
+  background:oklch(0.185 0.016 var(--h) / .55); color:oklch(0.99 0.01 var(--h)); font-size:0.9375rem}
+.sheet__img{width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:var(--sunk)}
+.gal{position:relative; background:var(--sunk)}
+.gal__strip{
+  display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
+  scrollbar-width:none; -webkit-overflow-scrolling:touch;
+}
+.gal__strip::-webkit-scrollbar{display:none}
+.gal__strip img{
+  flex:0 0 100%; width:100%; aspect-ratio:4/3; object-fit:cover;
+  scroll-snap-align:center; display:block; background:var(--sunk);
+}
+.gal__n{
+  position:absolute; right:var(--s-1); bottom:var(--s-1); z-index:2;
+  padding:3px 8px; border-radius:99px; font-size:0.6875rem; font-weight:600;
+  background:oklch(0.185 0.016 var(--h) / .62); color:oklch(0.99 0.01 var(--h));
+  font-variant-numeric:tabular-nums; pointer-events:none;
+}
+.gal__nav{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:32px; height:32px; border-radius:50%; border:none; cursor:pointer;
+  background:oklch(0.185 0.016 var(--h) / .5); color:oklch(0.99 0.01 var(--h));
+  display:grid; place-items:center; font-size:0.875rem; opacity:0; transition:opacity .18s;
+}
+.gal:hover .gal__nav{opacity:1}
+.gal__nav--prev{left:var(--s-1)} .gal__nav--next{right:var(--s-1)}
+@media (hover:none){ .gal__nav{display:none} }
+/* Half a listing's gallery is agency logos and watermarked plans. The bin is
+   on the frame at every width — it was reachable only from the full-screen
+   view before, which you had to know was there. */
+.gal--one{line-height:0}
+.gal__strip img, .gal--one img{cursor:zoom-in}
+.gal__del{
+  position:absolute; left:var(--s-1); bottom:var(--s-1); z-index:3;
+  width:32px; height:32px; border-radius:50%; cursor:pointer; padding:0;
+  display:grid; place-items:center; opacity:.8;
+  background:oklch(0.185 0.016 var(--h) / .62); color:oklch(0.99 0.01 var(--h));
+  border:1px solid oklch(1 0 0 / .2); transition:opacity .16s, background .16s;
+}
+.gal__del svg{width:17px; height:17px; display:block}
+.gal__del:hover{opacity:1; background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+.sheet__body{padding:var(--s1) var(--s2) var(--s2)}
+.sheet__kind{font-size:0.6875rem; font-weight:500; color:var(--ink-3); margin-bottom:5px}
+.sheet__name{font-family:var(--display); font-optical-sizing:auto; font-weight:400;
+  font-size:1.5rem; line-height:1.12; letter-spacing:-.012em; margin:0 0 3px}
+.sheet__where{font-size:0.75rem; color:var(--ink-3); margin-bottom:var(--s0); line-height:1.6}
+.sheet__where__acts{display:inline-flex; gap:var(--s0); margin-left:var(--s0); font-size:0.6875rem}
+.sheet__where__acts .linkbtn{text-decoration-color:oklch(from var(--accent) l c h / .4)}
+.sharebtn{
+  display:inline-block; margin:0 0 var(--s-1); padding:4px 9px;
+  background:none; border:1px solid var(--rule); border-radius:99px;
+  font-size:0.6875rem; font-weight:500; color:var(--ink-3); cursor:pointer;
+  transition:color .16s, border-color .16s;
+}
+.sharebtn:hover{color:var(--ink); border-color:var(--ink-3)}
+.linkbtn{
+  background:none; border:none; padding:0; cursor:pointer; font:inherit;
+  color:var(--accent); text-decoration:underline; text-underline-offset:2px;
+}
+.linkbtn:hover{color:var(--ink)}
+.sheet__price{
+  font-family:var(--ui); font-size:1.625rem; font-weight:600; line-height:1.1;
+  letter-spacing:-.015em; font-variant-numeric:tabular-nums; color:var(--accent);
+}
+.sheet__priceline{display:flex; align-items:center; gap:0; flex-wrap:wrap}
+.sheet__price--none{font-size:0.875rem; font-weight:400; color:var(--ink-3); font-style:italic; letter-spacing:0}
+.sheet__ppm{margin-top:3px; font-size:0.8125rem; font-weight:500; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.stats{display:flex; margin:var(--s0) 0 0; border-top:1px solid var(--rule); padding:0}
+.stats div{flex:1; padding:var(--s-1) 0 2px}
+.stats div + div{border-left:1px solid var(--rule); padding-left:var(--s0)}
+.stats div + div + div + div{padding-left:var(--s-1)}
+.stats dt{font-size:0.6875rem; font-weight:500; color:var(--ink-3); margin:0 0 3px}
+.stats dd{margin:0; font-size:0.8125rem; font-weight:500}
+
+.sec{margin-top:var(--s2); padding-top:var(--s1); border-top:1px solid var(--rule)}
+.sec > h3, .sec--fold > summary > h3{margin:0 0 var(--s-1); font-size:0.6875rem; font-weight:600; color:var(--ink-3)}
+/* a section that opens on demand: same heading, a +/– in front of it */
+.sec--fold > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:6px; margin:0 0 var(--s-1)}
+.sec--fold > summary::-webkit-details-marker{display:none}
+.sec--fold > summary::before{content:"+"; width:14px; font-size:0.8125rem; line-height:1; color:var(--ink-3); text-align:center}
+.sec--fold[open] > summary::before{content:"–"}
+.sec--fold > summary h3{margin:0}
+.sec--fold > summary:hover h3{color:var(--ink)}
+
+.nearby{list-style:none; margin:0; padding:0; display:grid}
+.nearby li{display:grid; grid-template-columns:22px 1fr auto auto; align-items:baseline; gap:var(--s-1);
+  padding:5px 0; font-size:0.8125rem; border-bottom:1px solid var(--rule)}
+.nearby li:last-child{border-bottom:0}
+.nearby__name{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.nearby__d{font-weight:600; font-variant-numeric:tabular-nums; text-align:right}
+.nearby__go{font-size:0.6875rem; color:var(--accent); text-decoration:none}
+.nearby__go:hover{text-decoration:underline}
+.nearby__how{font-weight:400}
+.nearby li[hidden]{display:none}
+.nearby__all{margin-top:var(--s-1)}
+
+/* One column of marks, all on the same 0–10 scale and the same grid, so the
+   stars and the numbers line up down the whole list. Colour says where a
+   mark comes from: ours in our own colours, Emplacement in coral because it
+   is the other one we set by hand, the three computed ones in gold. */
+.auto-marks{margin-top:var(--s-1)}
+.auto-row{
+  display:grid; grid-template-columns:86px auto 1fr; align-items:center;
+  gap:var(--s0); margin-bottom:3px;
+}
+.auto-row .autostars{--star:21px; --gap:3px}
+.auto-row > b{font-size:0.75rem; font-weight:600; color:var(--accent-2)}
+.auto-row__val{font-size:0.75rem; font-weight:700; color:var(--ink-2); justify-self:start}
+.auto-row__val i{font-style:normal; font-weight:500; color:var(--ink-3)}
+.auto-row__todo{font-size:0.6875rem; color:var(--ink-3)}
+.auto-row--none > b{color:var(--ink-3)}
+
+/* the two of us */
+.auto-row--user > b{color:var(--who)}
+.auto-row--user .autostars__on{color:var(--who)}
+.auto-row--user{margin-bottom:5px}
+/* Emplacement — set by hand like ours, so it is not gold either */
+.auto-row--spot > b{color:var(--accent)}
+.auto-row--spot .autostars__on{color:var(--accent)}
+.auto-row--spot{margin-bottom:5px}
+
+.score-clear{
+  background:none; border:none; cursor:pointer; font-size:0.6875rem;
+  color:var(--ink-3); padding:0 0 0 var(--s-1);
+}
+.score-clear:hover{color:var(--accent)}
+.readonly .score-clear{display:none}
+
+/* the one mark: everything above it, ours counted double, out of 10 */
+.auto-row--total{margin-top:var(--s-1); padding-top:var(--s-1); border-top:1px solid var(--rule)}
+.auto-row--total > b{color:var(--ink); font-weight:700}
+.auto-row--total .auto-row__val{color:var(--ink); font-size:0.8125rem}
+
+/* Every rating in the app: grey stars with a gold layer clipped to --fill,
+   so a half star costs no extra glyph. A live one carries five transparent
+   buttons over the top — the half of a button you hit is the half star —
+   whose thumb target hangs off a pseudo-element, so a small control keeps a
+   big tap area without widening the row. --star sizes the whole thing. */
+.autostars{--star:19px; --gap:2px; position:relative; display:inline-flex; line-height:0}
+.autostars__base, .autostars__on{display:flex; gap:var(--gap)}
+.autostars svg{width:var(--star); height:var(--star); display:block; flex:none}
+.autostars__base{color:var(--rule)}
+.autostars__on{
+  position:absolute; top:0; left:0; bottom:0; width:var(--fill);
+  overflow:hidden; color:var(--accent-2);
+}
+.autostars--live{cursor:pointer}
+.autostars__hit{
+  position:absolute; top:0; left:0; bottom:0; right:0; display:flex; gap:var(--gap);
+}
+.autostars__hit button{
+  width:var(--star); height:var(--star); flex:none; padding:0; border:none;
+  background:none; cursor:pointer; position:relative;
+}
+.autostars__hit button::after{content:""; position:absolute; top:-7px; bottom:-7px; left:-3px; right:-3px}
+.autostars__hit button:focus-visible{outline:2px solid var(--accent-2); outline-offset:3px}
+.readonly .autostars__hit{display:none}
+/* in the deck the rating block is centred, so the rows centre with it */
+.slide__rate .auto-marks{
+  margin-top:var(--s1); padding-top:var(--s0);
+  border-top:1px dashed oklch(1 0 0 / .16);
+}
+.slide__rate .auto-row{
+  display:flex; justify-content:center; align-items:center; gap:var(--s-1); margin-bottom:4px;
+}
+.slide__rate .auto-row > b{min-width:76px; text-align:right}
+.slide__rate .auto-row--total{border-top:1px solid oklch(1 0 0 / .24); padding-top:var(--s-1)}
+.slide__rate .auto-row--total > b{color:oklch(0.95 0.01 var(--h))}
+.slide__rate .auto-row--total .auto-row__val{color:oklch(0.95 0.01 var(--h))}
+.slide__rate .auto-row__todo{color:oklch(0.62 0.01 var(--h))}
+.slide__rate .autostars__base{color:oklch(1 0 0 / .22)}
+
+.notes{display:grid; gap:var(--s-1); margin-bottom:var(--s-1)}
+.note{padding:var(--s-1) var(--s0); background:var(--sunk); border-radius:4px; font-size:0.8125rem; line-height:1.45}
+.note header{display:flex; justify-content:space-between; align-items:baseline; gap:var(--s-1); margin-bottom:3px}
+.note b{font-size:0.6875rem; font-weight:600; color:var(--who)}
+.note time{font-size:0.625rem; color:var(--ink-3)}
+.note a{color:var(--accent); overflow-wrap:anywhere}
+.note button{background:none; border:none; cursor:pointer; font-size:0.625rem; color:var(--ink-3); padding:0}
+.note button:hover{color:var(--accent)}
+.note__foot{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:6px}
+.note .react{
+  display:inline-flex; align-items:center; gap:3px; height:24px; padding:0 7px;
+  border:1px solid var(--rule); border-radius:999px; background:var(--surface);
+  font-size:0.8125rem; line-height:1; color:var(--ink-2);
+}
+.note .react span{font-size:0.6875rem; font-weight:600}
+.note .react:hover{border-color:var(--ink-3); color:var(--ink-2)}
+.note .react--mine{border-color:var(--accent); background:color-mix(in oklch, var(--accent) 12%, var(--surface))}
+.note .react--add{color:var(--ink-3); opacity:.55; padding:0 6px}
+.note__foot:has(.react:not(.react--add)) .react--add,
+.note:hover .react--add, .note .react--add[aria-expanded="true"], .note .react--add:focus-visible{opacity:1}
+@media (hover:none){ .note .react--add{opacity:1} }
+.react-pick{display:inline-flex; gap:2px; padding:2px; border:1px solid var(--rule); border-radius:999px; background:var(--surface)}
+.react-pick[hidden]{display:none}
+.note .react-pick button{font-size:1rem; width:28px; height:24px; border-radius:999px}
+.note .react-pick button:hover{background:var(--sunk)}
+.note .note__del{margin-left:auto}
+.note-form{display:flex; gap:var(--s-1)}
+.note-form textarea{
+  flex:1; padding:var(--s-1) var(--s0); border:1px solid var(--rule); border-radius:4px;
+  background:var(--surface); color:var(--ink); font:400 0.8125rem var(--ui); resize:vertical; min-height:38px;
+}
+.note-form textarea:focus{outline:none; border-color:var(--accent)}
+.btn{
+  padding:8px var(--s0); border-radius:4px; border:1px solid var(--rule);
+  background:var(--surface); cursor:pointer; font-size:0.75rem; font-weight:500;
+}
+.btn:hover{border-color:var(--ink-3)}
+.btn--go{background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:700}
+.btn--go:hover{filter:brightness(1.08)}
+
+.edit{display:grid; gap:var(--s-1)}
+.edit__grid{display:grid; grid-template-columns:1fr 1fr; gap:var(--s-1)}
+.edit label{display:block; font-size:0.6875rem; font-weight:500; color:var(--ink-3); margin-bottom:3px}
+.edit input, .edit select, .edit textarea{
+  width:100%; padding:7px var(--s-1); border:1px solid var(--rule); border-radius:4px;
+  background:var(--surface); color:var(--ink); font:400 0.8125rem var(--ui);
+}
+.edit input:focus, .edit select:focus, .edit textarea:focus{outline:none; border-color:var(--accent)}
+.edit textarea{resize:vertical; line-height:1.4}
+.edit__actions{display:flex; gap:var(--s-1); margin-top:var(--s-2)}
+
+/* Déjà dans la liste ? — likely twins of the advert being added */
+.same{margin-top:var(--s1); padding:var(--s0); border:1px solid var(--rule); border-radius:var(--r-md); background:var(--surface)}
+.same__hd{font-size:0.8125rem; font-weight:600; color:var(--ink)}
+.same__sub{margin:2px 0 var(--s-1); font-size:0.6875rem; color:var(--ink-3)}
+.same__row{display:flex; align-items:center; gap:var(--s0); width:100%; margin-top:6px; padding:6px;
+  border:1px solid transparent; border-radius:var(--r-sm); background:var(--raised); color:var(--ink);
+  font:inherit; text-align:left; cursor:pointer}
+.same__row:hover{border-color:var(--accent)}
+.same__row img{width:56px; height:42px; flex:none; object-fit:cover; border-radius:6px; background:var(--sunk)}
+.same__txt{flex:1; min-width:0; display:grid; gap:1px}
+.same__txt b{font-size:0.8125rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.same__txt span{font-size:0.6875rem; color:var(--ink-3)}
+.same__go{flex:none; padding:5px 10px; border-radius:var(--r-pill); background:var(--accent); color:var(--on-accent);
+  font-size:0.6875rem; font-weight:600}
+
+.gallery{display:grid; grid-template-columns:repeat(auto-fill, minmax(72px,1fr)); gap:var(--s-2)}
+.gallery img, .gallery video{width:100%; aspect-ratio:1; object-fit:cover; border-radius:3px; background:var(--sunk)}
+.shot{position:relative; margin:0; display:block; line-height:0; cursor:zoom-in}
+.shot video{pointer-events:none}
+.shot__play{position:absolute; left:50%; top:50%; width:28px; height:28px; margin:-14px 0 0 -14px;
+  display:grid; place-items:center; border-radius:50%; pointer-events:none;
+  background:oklch(0 0 0 / .62); color:#fff; font-size:0.6875rem; line-height:1; padding-left:2px}
+.shot__x{position:absolute; top:3px; right:3px; width:20px; height:20px; padding:0;
+  display:grid; place-items:center; border:0; border-radius:50%; cursor:pointer;
+  background:oklch(0 0 0 / .62); color:#fff; font-size:0.625rem; line-height:1;
+  opacity:0; transition:opacity .16s}
+.shot:hover .shot__x, .shot__x:focus-visible{opacity:1}
+.shot__x:hover{background:var(--accent); color:var(--on-accent)}
+@media (hover:none){ .shot__x{opacity:1} }
+.up{position:relative; overflow:hidden; display:inline-block}
+.up input{position:absolute; inset:0; opacity:0; cursor:pointer; font-size:0}
+
+/* documents: drop zone + list */
+.sec__count{font-weight:500; color:var(--accent)}
+.drop{display:flex; flex-direction:column; align-items:center; gap:var(--s-2);
+  padding:var(--s2) var(--s0); border:1px dashed var(--rule); border-radius:6px;
+  background:var(--sunk); text-align:center; transition:border-color .16s, background .16s}
+.drop--over{border-color:var(--accent); border-style:solid; background:var(--surface)}
+.drop--over .drop__lead{color:var(--accent)}
+.drop__arw{display:block; font-size:1.125rem; line-height:1; color:var(--ink-3)}
+.drop__lead{margin:0; font-size:0.8125rem; font-weight:500}
+.drop__hint{margin:0; font-size:0.6875rem; color:var(--ink-3)}
+
+/* drop anywhere on the panel */
+.sheet__drop{position:absolute; inset:0; z-index:5; display:grid; place-items:center;
+  padding:var(--s2); background:color-mix(in oklab, var(--surface) 88%, transparent);
+  backdrop-filter:blur(2px); border-radius:inherit; pointer-events:none}
+.sheet__drop__in{display:grid; gap:6px; justify-items:center; text-align:center;
+  padding:var(--s2) var(--s1); border:2px dashed var(--accent); border-radius:8px;
+  max-width:26ch; color:var(--ink)}
+.sheet__drop__in b{font-size:0.9375rem}
+.sheet__drop__in span:last-child{font-size:0.6875rem; color:var(--ink-3); line-height:1.4}
+.sheet__drop__arw{font-size:1.5rem; line-height:1; color:var(--accent)}
+.sheet__drop[hidden]{display:none}
+.docs{list-style:none; margin:var(--s-1) 0 0; padding:0; display:grid; gap:2px}
+.docs__none{padding:var(--s-1) 0; font-size:0.6875rem; font-style:italic; color:var(--ink-3)}
+.doc{display:flex; align-items:center; gap:var(--s-2); border-radius:4px}
+.doc:hover{background:var(--sunk)}
+.doc__a{flex:1; min-width:0; display:flex; align-items:center; gap:var(--s-1);
+  padding:6px 4px; color:inherit; text-decoration:none}
+.doc__ico{flex:none; width:32px; padding:3px 0; border-radius:3px; background:var(--surface);
+  border:1px solid var(--rule); font-size:0.5625rem; font-weight:700; letter-spacing:.04em;
+  text-align:center; color:var(--ink-3)}
+.doc__txt{min-width:0; display:block}
+.doc__txt b{display:block; font-size:0.75rem; font-weight:500;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.doc__meta{display:block; font-size:0.6875rem; color:var(--ink-3)}
+.doc__x{flex:none; padding:4px 7px; border:0; background:none; cursor:pointer;
+  font-size:0.75rem; line-height:1; color:var(--ink-3); opacity:0; transition:opacity .16s}
+.doc:hover .doc__x, .doc__x:focus-visible{opacity:1}
+.doc--busy, .doc--err{padding:6px 4px; gap:var(--s-1)}
+.doc--busy .doc__ico{opacity:.55}
+.doc__bar{display:block; height:3px; margin-top:4px; border-radius:2px;
+  background:var(--rule); overflow:hidden}
+.doc__barfill{display:block; height:100%; background:var(--accent);
+  transition:width .18s linear}
+/* no hover to reveal the ✕ on a phone, so it simply stays visible */
+@media (hover:none){ .doc__x{opacity:1} }
+.doc--err .doc__ico{color:var(--accent); border-color:var(--accent)}
+.doc--err .doc__meta{color:var(--accent)}
+
+.sheet__link{display:inline-block; margin-top:var(--s0); padding-bottom:2px; font-size:0.75rem;
+  font-weight:500; color:var(--accent); text-decoration:none; border-bottom:1px solid currentColor}
+.sheet__link--gone{color:var(--ink-3); text-decoration:line-through; border-bottom-color:transparent}
+.sheet__also{margin:var(--s-2) 0 0; font-size:0.6875rem; color:var(--ink-3)}
+.sheet__also a{color:var(--ink-2); text-decoration:none; border-bottom:1px solid var(--rule)}
+.sheet__also a:hover{color:var(--accent); border-bottom-color:currentColor}
+.sheet__approx{margin:var(--s0) 0 0; font-size:0.6875rem; color:var(--ink-3)}
+.sheet__pos{margin:var(--s0) 0 0; font-size:0.6875rem; color:var(--ink-3); line-height:1.5}
+/* the panel's own locator — only built at phone width, see openSheet() */
+.sheet__map{display:none}
+@media (max-width:860px){
+  .sheet__map{
+    display:block; height:220px; margin-top:var(--s1); border-radius:6px; overflow:hidden;
+    border:1px solid var(--rule); background:var(--sunk); touch-action:none;
+  }
+  .sheet__map .leaflet-container{background:var(--sunk)}
+  .sheet__map .poi{font-size:0.625rem; padding:3px 8px 3px 5px}
+  .sheet__pos{margin-top:var(--s-1)}
+}
+.hide-row{display:flex; align-items:center; gap:var(--s-1); flex-wrap:wrap}
+.hide-row .btn--warn{color:var(--accent); border-color:var(--accent)}
+.hidden-note{
+  margin:0 0 var(--s-1); padding:var(--s-1) var(--s0); border-radius:4px;
+  background:var(--accent-q); color:var(--ink-2); font-size:0.75rem;
+}
+.card--hidden{opacity:.55}
+.card--hidden .thumb{filter:grayscale(1)}
+
+/* ─────────────── vue tableau ───────────────
+   The map answers "where is it"; the table answers "which of these is the
+   better buy", which is a question about fifteen rows at once. Same filters,
+   same sort state as the rail, every column orderable both ways. */
+.viewtog{
+  position:absolute; z-index:900; top:var(--s1); right:var(--s1);
+  display:flex; gap:2px; padding:3px; border-radius:var(--r-pill);
+  background:oklch(from var(--paper) l c h / .92); backdrop-filter:blur(8px);
+  border:1px solid var(--rule); box-shadow:var(--shadow-2);
+}
+.viewtog button{
+  border:none; background:none; cursor:pointer; border-radius:var(--r-pill);
+  padding:8px 16px; font:600 0.75rem var(--ui); color:var(--ink-3);
+  transition:background .16s, color .16s;
+}
+.viewtog button:hover{color:var(--ink)}
+.viewtog button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+/* the detail panel owns the right edge while it is open */
+.map-wrap:has(.sheet.open) .viewtog{right:calc(min(400px, 100%) + var(--s1))}
+
+.view-table #map, .view-table .key, .view-dash #map, .view-dash .key{display:none}
+
+/* Dash: an overview that reads like a page, not a control panel. One
+   column of panels, the visits first because they have a date on them. */
+.dashwrap{position:absolute; inset:0; background:var(--paper); overflow:auto; overscroll-behavior:contain; container-type:inline-size}
+.dashwrap[hidden]{display:none}
+/* on a desktop the open panel takes the right edge; the dash steps aside */
+@media (min-width:861px){ .map-wrap:has(.sheet.open) .dashwrap{right:min(400px, 100%)} }
+.dash{max-width:1000px; margin:0 auto; padding:76px var(--s3) var(--s4); display:grid; gap:var(--s2)}
+.dpanel{background:var(--surface); border:1px solid var(--rule); border-radius:16px; padding:var(--s1) var(--s2) var(--s-1)}
+.dpanel h2{display:flex; align-items:baseline; gap:var(--s-1); margin:0 0 var(--s-2);
+  font:700 1.125rem/1.3 var(--display); color:var(--ink)}
+.dpanel h2 small{font:500 0.8125rem var(--ui); color:var(--ink-3)}
+.dpanel--visits{border-color:oklch(from var(--accent) l c h / .5); box-shadow:inset 4px 0 0 var(--accent)}
+.dlist{list-style:none; margin:0; padding:0}
+.dlist > li + li{border-top:1px solid var(--rule-2)}
+.dempty{padding:var(--s1) 0; font-size:0.875rem; color:var(--ink-2)}
+
+/* rows are flat lines on the panel, not boxes inside a box */
+.drow{
+  width:calc(100% + 2 * var(--s-1)); margin:0 calc(-1 * var(--s-1));
+  display:flex; align-items:center; gap:var(--s1); text-align:left;
+  padding:14px var(--s-1); border:0; border-radius:10px; background:none;
+  color:var(--ink); font:inherit; cursor:pointer; transition:background .14s;
+}
+.drow:hover{background:var(--raised)}
+.drow:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.drow__when{flex:none; display:grid; width:104px; font-variant-numeric:tabular-nums}
+.drow__when b{font:700 1.25rem/1.1 var(--display)}
+.drow__when span{font-size:0.8125rem; font-weight:500; color:var(--ink-2)}
+.drow__what{flex:1; min-width:0; display:grid; gap:3px}
+.drow__what > b{font-size:1rem; font-weight:600; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.drow__what > span{font-size:0.8125rem; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums}
+.drow__rank{flex:none; width:28px; height:28px; display:grid; place-items:center; border-radius:50%;
+  background:var(--sunk); font:700 0.875rem var(--display); color:var(--ink-2)}
+.dlist > li:first-child .drow__rank{background:var(--gold); color:var(--on-gold)}
+.drow__mark{flex:none; font:700 1.25rem var(--display); color:var(--gold-ink); font-variant-numeric:tabular-nums}
+.drow__mark small{font:500 0.75rem var(--ui); color:var(--ink-3); margin-left:2px}
+.drow--note{align-items:flex-start}
+.drow__by{font-size:0.8125rem; color:var(--ink-2); display:flex; gap:5px; min-width:0}
+.drow__by b{color:var(--who); font-weight:700}
+.drow__by em{font-style:normal; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.drow__by time{margin-left:auto; padding-left:var(--s-1); white-space:nowrap; color:var(--ink-3)}
+.drow .drow__quote{font-size:0.9375rem; line-height:1.45; color:var(--ink); white-space:normal;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+.dchip{flex:none; padding:5px 12px; border-radius:var(--r-pill); font-size:0.8125rem; font-weight:600;
+  background:var(--sunk); color:var(--ink-2)}
+.dchip--now{background:var(--accent); color:var(--on-accent)}
+.dchip--soon{background:var(--accent-q); color:var(--accent)}
+.dchip--todo{background:oklch(from var(--gold) l c h / .22); color:var(--gold-ink)}
+.dtiles{display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--s1)}
+.dtile{
+  display:grid; gap:4px; align-content:start; text-align:left; padding:var(--s1) var(--s1) 18px; border-radius:16px;
+  background:var(--surface); border:1px solid var(--rule); color:var(--ink);
+  font:inherit; cursor:pointer; transition:border-color .14s, transform .14s;
+}
+.dtile:hover{border-color:var(--accent); transform:translateY(-1px)}
+.dtile:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.dtile b{font:800 2.75rem/1 var(--display); letter-spacing:-.02em; margin-bottom:8px; font-variant-numeric:tabular-nums}
+.dtile span{font-size:0.9375rem; font-weight:600}
+.dtile small{font-size:0.8125rem; color:var(--ink-2)}
+.dcols{display:grid; grid-template-columns:1fr 1fr; gap:var(--s2); align-items:start}
+@container (max-width:860px){ .dcols{grid-template-columns:1fr} }
+@media (max-width:860px){
+  .dash{padding:64px var(--s1) 34dvh; gap:var(--s1)}
+  .dpanel{padding:var(--s0) var(--s1) var(--s-2)}
+  .dtiles{grid-template-columns:1fr 1fr; gap:var(--s-1)}
+  .dtile b{font-size:2.25rem}
+  .drow__when{width:84px}
+  .drow__when b{font-size:1.125rem}
+}
+
+.tablewrap{position:absolute; inset:0; background:var(--paper)}
+.tablewrap[hidden]{display:none}
+.tablewrap__scroll{height:100%; overflow:auto; overscroll-behavior:contain}
+.tbl{border-collapse:separate; border-spacing:0; width:max-content; min-width:100%; font-size:0.75rem}
+.tbl th{text-align:left; font-weight:600; color:var(--ink-3); white-space:nowrap; padding:0}
+.tbl thead th{position:sticky; background:var(--surface); z-index:2}
+.tbl__grp th{
+  height:30px; padding:0 var(--s-1); top:0; font-size:0.5625rem; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3);
+  border-bottom:1px solid var(--rule-2);
+}
+.tbl__grp th:not(:empty){border-left:1px solid var(--rule-2)}
+.tbl thead tr + tr th{top:30px; border-bottom:1px solid var(--rule)}
+.tbl thead button{
+  background:none; border:none; cursor:pointer; color:inherit; font:inherit;
+  padding:9px var(--s-1); display:flex; align-items:center; gap:4px; width:100%;
+}
+.tbl thead .n button{justify-content:flex-end}
+.tbl thead button:hover{color:var(--ink)}
+.tbl thead button i{font-style:normal; font-size:0.625rem; color:var(--accent-2)}
+.tbl th[aria-sort] button{color:var(--accent-2)}
+
+.trow{--row:var(--paper); cursor:pointer}
+.trow:hover{--row:var(--sunk)}
+.trow[aria-current="true"]{--row:var(--accent-q)}
+.trow--hidden{opacity:.5}
+.trow--sold{opacity:.62}
+.trow--sold .n b{text-decoration:line-through; text-decoration-thickness:1px}
+.tbl td{
+  background:var(--row); padding:6px var(--s-1); vertical-align:middle;
+  border-bottom:1px solid var(--rule-2); transition:background .12s;
+}
+.tbl .n{text-align:right; font-variant-numeric:tabular-nums}
+.tbl td i{font-style:normal; color:var(--ink-3)}
+/* the name column stays put while the figures scroll under the thumb */
+.tbl th:first-child, .tbl td:first-child{position:sticky; left:0; z-index:1}
+.tbl td:first-child{background:var(--row)}
+.tbl thead th:first-child{z-index:3}
+.t-bien{display:flex; align-items:center; gap:var(--s-1); min-width:240px}
+/* Three of the listing's photos, fanned like held cards. The pointer
+   entering the stack opens it out — with a transform, so the column never
+   resizes — and the photo under it shows a big preview that floats clear of
+   its neighbours, so you can run along the strip without fighting it. */
+.t-shots{display:inline-flex; align-items:center; flex:none; padding:2px 0}
+.t-shot{
+  position:relative; display:block; flex:none;
+  transition:transform .18s cubic-bezier(.16,.84,.30,1);
+}
+.t-shot + .t-shot{margin-left:-24px}
+.t-shots:hover .t-shot:nth-child(2){transform:translateX(26px)}
+.t-shots:hover .t-shot:nth-child(3){transform:translateX(52px)}
+.t-shot img{
+  display:block; width:40px; height:30px; object-fit:cover; border-radius:4px;
+  background:var(--sunk); border:1.5px solid var(--paper); box-shadow:var(--shadow-1);
+  transition:border-color .14s, filter .14s;
+}
+/* The hero leads the hand: it is the photo that stands for the house, so it
+   is bigger and it is the top card — the others tuck in behind it rather
+   than painting over its edge in document order. */
+.t-shot:first-child img{width:62px; height:46px; border-radius:5px}
+.t-shot:nth-child(1){z-index:3}
+.t-shot:nth-child(2){z-index:2}
+.t-shot:nth-child(3){z-index:1}
+.t-shot:hover{z-index:8}
+.t-shots:hover .t-shot img{filter:saturate(.75) brightness(.82)}
+.t-shot:hover img{filter:none; border-color:var(--accent)}
+/* the preview: painted from the same photo, never under the pointer */
+.t-shot::after{
+  content:""; position:absolute; left:50%; bottom:calc(100% + 9px);
+  width:210px; height:158px; margin-left:-105px; border-radius:6px;
+  background:var(--sunk) var(--u) center/cover no-repeat;
+  border:2px solid var(--accent); box-shadow:var(--shadow-2);
+  opacity:0; transform:scale(.88); transform-origin:50% 100%;
+  transition:opacity .13s, transform .18s cubic-bezier(.16,.84,.30,1);
+  pointer-events:none; z-index:9;
+}
+.t-shot:hover::after{opacity:1; transform:scale(1)}
+/* the top rows have no room above them, so theirs drops below instead */
+.trow:nth-child(-n+2) .t-shot::after{
+  bottom:auto; top:calc(100% + 9px); transform-origin:50% 0;
+}
+.trow:hover td:first-child{z-index:5}
+@media (prefers-reduced-motion:reduce){ .t-shot, .t-shot::after{transition:opacity .13s} }
+@media (hover:none){ .t-shot::after{display:none} }
+.t-bien b{
+  display:block; font-size:0.8125rem; font-weight:600; color:var(--ink);
+  max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.t-bien em{font-style:normal; font-size:0.625rem; color:var(--ink-3)}
+.t-bien .rank{position:static; width:17px; height:17px; font-size:0.5625rem; border-width:1.5px; flex:none}
+.tbl .dpebadge{padding:2px 7px}
+.t-mark{font-weight:700; font-size:0.8125rem; color:var(--c)}
+.t-total{display:inline-flex; flex-direction:column; align-items:flex-end; gap:3px}
+.t-total b{font-size:0.875rem; font-weight:800; color:var(--ink)}
+.t-total i{display:block; width:48px; height:3px; border-radius:2px; background:var(--rule-2); position:relative}
+.t-total i::after{
+  content:""; position:absolute; left:0; top:0; bottom:0;
+  width:var(--p); border-radius:2px; background:var(--nc, var(--accent-2));
+}
+.t-act{text-align:center}
+.t-go{
+  background:none; border:1px solid var(--rule); border-radius:var(--r-pill);
+  width:28px; height:28px; padding:0; cursor:pointer; color:var(--ink-3);
+  display:grid; place-items:center;
+}
+.t-go svg{width:16px; height:16px; display:block}
+.t-go:hover{color:var(--on-accent); background:var(--accent); border-color:var(--accent)}
+/* what we said about it, two most recent first — the column you read last
+   and the one that usually decides it */
+.t-notes{display:flex; flex-direction:column; gap:3px; max-width:300px; min-width:160px}
+.t-note{
+  display:block; font-size:0.6875rem; line-height:1.35; color:var(--ink-2);
+  overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
+  -webkit-line-clamp:2; -webkit-box-orient:vertical;
+}
+.t-note b{color:var(--who); font-weight:700; margin-right:5px}
+.t-notes em{font-style:normal; font-size:0.625rem; color:var(--ink-3)}
+.tbl td:has(.t-notes){white-space:normal}
+
+/* a guest account is never shown what the API would refuse it */
+body.guest #add, body.guest #addPoi{display:none}
+.t-visit--ro{cursor:default; border-style:solid}
+
+/* when we are going round */
+.t-visit{
+  background:none; border:1px dashed var(--rule); border-radius:var(--r-pill);
+  padding:4px 11px; cursor:pointer; font:500 0.6875rem var(--ui); color:var(--ink-3);
+  white-space:nowrap; transition:border-color .14s, color .14s, background .14s;
+}
+.t-visit:hover{color:var(--ink); border-color:var(--ink-3)}
+.t-visit--set{
+  border-style:solid; border-color:var(--accent); color:var(--accent);
+  font-weight:700; background:var(--accent-q);
+}
+
+.sheet__visit{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--s-1);
+  margin:12px 0 4px; font-size:0.75rem; color:var(--ink-3);
+}
+.sv{display:inline-flex; align-items:center; gap:6px}
+.sv svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.4; stroke-linecap:round}
+.sv--set{border-color:var(--visit); color:var(--visit); background:oklch(from var(--visit) l c h / .1); font-weight:700}
+/* every visit of the bien, the ones done quieter than the ones to come */
+.sheet__visit{align-items:flex-start}
+.svs{display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px}
+.sv--past{border-color:var(--rule); color:var(--ink-2); background:none; font-weight:600}
+.sv--past svg{stroke-width:2}
+.vmore{margin-left:4px; font-size:0.625rem; font-weight:700; color:var(--ink-3)}
+/* the picker: a month, a day, a time. On <body>, so the table's own
+   scrolling cannot clip it. */
+.cal{
+  position:fixed; z-index:3500; width:252px; padding:var(--s-1);
+  background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-sm);
+  box-shadow:var(--shadow-2); font-family:var(--ui);
+}
+.cal__head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+.cal__head b{font-size:0.75rem; font-weight:600; text-transform:capitalize}
+.cal__head button{
+  width:26px; height:26px; border:none; background:none; cursor:pointer;
+  color:var(--ink-3); border-radius:50%; font-size:0.875rem; line-height:1;
+}
+.cal__head button:hover{background:var(--raised); color:var(--ink)}
+.cal__dow, .cal__grid{display:grid; grid-template-columns:repeat(7, 1fr); gap:2px}
+.cal__dow i{
+  font-style:normal; text-align:center; font-size:0.5625rem; font-weight:700;
+  color:var(--ink-3); padding-bottom:3px;
+}
+.cal__grid button{
+  aspect-ratio:1; border:none; background:none; border-radius:5px; cursor:pointer;
+  color:var(--ink-2); font:500 0.75rem var(--ui); font-variant-numeric:tabular-nums;
+}
+.cal__grid button:hover{background:var(--raised); color:var(--ink)}
+.cal__grid button.is-today{color:var(--accent); font-weight:800}
+.cal__grid button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent); font-weight:700}
+.cal__foot{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--s-2); margin-top:var(--s-1);
+  padding-top:var(--s-1); border-top:1px solid var(--rule-2);
+}
+.cal__foot label{display:flex; align-items:center; gap:4px; font-size:0.6875rem; color:var(--ink-3)}
+.cal__foot input[type="time"]{
+  background:var(--sunk); border:1px solid var(--rule); border-radius:4px;
+  color:var(--ink); font:600 0.75rem var(--ui); padding:4px 6px; width:84px;
+}
+.cal__foot .btn{padding:5px 10px; font-size:0.6875rem}
+/* who goes round: the two of us, each in our own colour */
+.cal__who{display:inline-flex; border:1px solid var(--rule); border-radius:var(--r-pill); overflow:hidden}
+.cal__who button{background:none; border:0; padding:4px 9px; font:600 0.6875rem var(--ui); color:var(--ink-3); cursor:pointer}
+.cal__who button + button{border-left:1px solid var(--rule)}
+.cal__who button[aria-pressed="true"]{color:var(--who); background:oklch(from var(--who) l c h / .14)}
+.vby{color:var(--who); font-weight:700}
+.vby::before{content:'· '; color:var(--ink-3); font-weight:400}
+.drow__what .vby::before{content:none}
+.drow__what .vby::after{content:' · '; color:var(--ink-3); font-weight:400}
+
+.tbl__empty{padding:var(--s4) var(--s2); text-align:center; color:var(--ink-3)}
+.tbl__empty h2{font-size:1rem; margin:0 0 var(--s-1); color:var(--ink)}
+.tbl__empty p{margin:0; font-size:0.8125rem}
+
+/* ─────────────── adding a property ─────────────── */
+#add{font-size:1rem; line-height:1}
+.placing #map{cursor:crosshair}
+/* While placing, existing pins must not swallow the click — let it fall
+   through to the map so you can drop a point on top of a cluster. */
+.placing .leaflet-marker-pane{pointer-events:none}
+.hint{
+  position:absolute; z-index:850; top:var(--s1); left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:var(--s0); padding:9px var(--s1);
+  background:var(--ink); color:var(--paper); border-radius:99px;
+  box-shadow:var(--shadow-2); font-size:0.75rem; font-weight:500; white-space:nowrap;
+}
+.hint[hidden]{display:none}
+@media (max-width:860px){ .hint{z-index:1400; max-width:calc(100% - 24px); white-space:normal} }
+.hint button{
+  background:none; border:none; color:var(--paper); opacity:.65;
+  cursor:pointer; font-size:0.75rem; padding:0; text-decoration:underline;
+}
+.hint button:hover{opacity:1}
+
+.pin-new{
+  width:15px; height:15px; border-radius:50% 50% 50% 2px; transform:rotate(-45deg);
+  background:var(--accent); border:2.5px solid var(--paper); box-shadow:var(--shadow-2);
+}
+.addlink{
+  display:block; margin-top:var(--s0); font-size:0.6875rem; color:var(--ink-3);
+}
+.addlink a{color:var(--accent)}
+
+/* ─────────────── points of interest ─────────────── */
+.poi{
+  position:absolute; left:0; top:0; transform:translate(-50%,-100%);
+  display:flex; align-items:center; gap:5px; cursor:pointer;
+  padding:5px 11px 5px 7px; border-radius:var(--r-pill); white-space:nowrap;
+  background:var(--ink); color:var(--paper);
+  border:2px solid var(--paper); box-shadow:var(--shadow-2);
+  font-size:0.6875rem; font-weight:700;
+  transition:transform .2s cubic-bezier(.16,.84,.30,1);
+}
+.poi::after{
+  content:""; position:absolute; left:50%; bottom:-5px; width:8px; height:8px;
+  background:var(--ink); border:2px solid var(--paper); border-top:none; border-left:none;
+  transform:translateX(-50%) rotate(45deg);
+}
+.poi b{font-size:0.8125rem; line-height:1; font-weight:400}
+.anchor:hover .poi{transform:translate(-50%,-100%) scale(1.07)}
+/* a repère is context, not a candidate — it stays visually quieter than a price */
+.compact-poi .poi span{display:none}
+
+.poidlg{
+  position:fixed; inset:0; z-index:2600; display:grid; place-items:center;
+  background:oklch(0.185 0.016 var(--h) / .45); padding:var(--s1);
+}
+.poidlg[hidden]{display:none}
+.poidlg__card{
+  width:100%; max-width:360px; background:var(--surface); border:1px solid var(--rule);
+  border-radius:8px; padding:var(--s2); box-shadow:var(--shadow-2);
+}
+.poidlg__card h2{
+  margin:0 0 var(--s1); font-family:var(--display); font-optical-sizing:auto;
+  font-weight:400; font-size:1.375rem; letter-spacing:-.01em;
+}
+.poidlg__card label, .poidlg__lab{
+  display:block; font-size:0.6875rem; font-weight:500; color:var(--ink-3); margin-bottom:5px;
+}
+.poidlg__card input{
+  width:100%; padding:9px var(--s0); border:1px solid var(--rule); border-radius:4px;
+  background:var(--paper); color:var(--ink); font:400 0.875rem var(--ui); margin-bottom:var(--s1);
+}
+.poidlg__card input:focus{outline:none; border-color:var(--accent)}
+.poidlg__icons{
+  display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; margin-bottom:var(--s1);
+}
+.poidlg__icons button{
+  aspect-ratio:1; border-radius:6px; cursor:pointer; font-size:1.125rem;
+  background:var(--paper); border:1.5px solid var(--rule);
+  display:grid; place-items:center; transition:border-color .14s, background .14s;
+}
+.poidlg__icons button:hover{border-color:var(--ink-3)}
+.poidlg__icons button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-q)}
+.poidlg__acts{display:flex; gap:var(--s-1); flex-wrap:wrap}
+
+/* ═══════════════ Browse: one property, full screen ═══════════════
+   A deliberate break from the paper-white list. The photography carries
+   this view, so the surround goes to ink and everything else recedes;
+   the only bright thing on screen is the rating you came here to give. */
+.browse-btn{
+  padding:8px 15px; border-radius:var(--r-pill); cursor:pointer;
+  background:var(--accent); color:var(--on-accent); border:none;
+  font-size:0.75rem; font-weight:800; letter-spacing:-.01em;
+  transition:transform .16s cubic-bezier(.16,.84,.30,1), filter .16s;
+}
+.browse-btn:hover{filter:brightness(1.08)}
+.browse-btn:active{transform:scale(.95)}
+
+.deck{
+  position:fixed; inset:0; z-index:3000;
+  background:oklch(0.13 0.012 var(--h));
+  overflow:hidden; touch-action:pan-y;
+}
+.deck[hidden]{display:none}
+.deck__stage{display:flex; height:100%; will-change:transform}
+.deck__stage.glide{transition:transform .32s cubic-bezier(.16,.84,.30,1)}
+@media (prefers-reduced-motion:reduce){ .deck__stage.glide{transition:none} }
+
+.slide{
+  flex:0 0 100%; height:100%; overflow-y:auto; overscroll-behavior:contain;
+  display:flex; flex-direction:column; align-items:center;
+  -webkit-overflow-scrolling:touch;
+}
+.slide__inner{width:100%; max-width:560px; padding-bottom:var(--s4)}
+
+/* hero */
+.slide__shot{position:relative; width:100%; aspect-ratio:4/3; background:oklch(0.2 0.01 var(--h))}
+/* Native scroll-snap rather than a hand-rolled drag: it gets momentum,
+   rubber-banding and trackpad support right, and it keeps the gesture
+   inside the photo, so the deck's own swipe never fights it. */
+.slide__gal{
+  display:flex; height:100%; overflow-x:auto; overflow-y:hidden;
+  scroll-snap-type:x mandatory; scrollbar-width:none;
+  -webkit-overflow-scrolling:touch; touch-action:pan-x;
+}
+.slide__gal::-webkit-scrollbar{display:none}
+.slide__gal figure{
+  flex:0 0 100%; width:100%; height:100%; margin:0; position:relative;
+  scroll-snap-align:center; overflow:hidden;
+  background-size:cover; background-position:center;
+}
+/* The whole photo, never cropped — and instead of dead black bars, a blurred
+   enlargement of the same image fills the gaps. */
+.slide__gal figure::before{
+  content:""; position:absolute; inset:0; z-index:0;
+  background-image:inherit; background-size:cover; background-position:center;
+  filter:blur(34px) brightness(.42) saturate(1.1); transform:scale(1.18);
+}
+.slide__gal figure img{
+  position:relative; z-index:1; width:100%; height:100%;
+  object-fit:cover; display:block; cursor:zoom-in;
+}
+.slide__arw{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:4;
+  width:34px; height:34px; border-radius:50%; cursor:pointer;
+  background:oklch(0 0 0 / .45); border:1px solid oklch(1 0 0 / .2);
+  color:oklch(0.97 0 0); display:grid; place-items:center; font-size:1rem;
+  opacity:0; transition:opacity .18s;
+}
+.slide__shot:hover .slide__arw{opacity:1}
+.slide__arw--p{left:10px} .slide__arw--n{right:10px}
+@media (hover:none){ .slide__arw{display:none} }
+
+/* ─── full-screen photo ─── */
+.lightbox{
+  position:fixed; inset:0; z-index:4000; background:oklch(0.07 0 0);
+  display:flex; flex-direction:column;
+}
+.lightbox[hidden]{display:none}
+.lightbox__strip{
+  flex:1; min-height:0; display:flex; overflow-x:auto; overflow-y:hidden;
+  scroll-snap-type:x mandatory; scrollbar-width:none;
+  -webkit-overflow-scrolling:touch; touch-action:pan-x;
+}
+.lightbox__strip::-webkit-scrollbar{display:none}
+.lightbox__strip img{
+  flex:0 0 100%; width:100%; height:100%; object-fit:contain;
+  scroll-snap-align:center; cursor:zoom-out;
+}
+.lightbox__strip video{
+  flex:0 0 100%; width:100%; height:100%; object-fit:contain;
+  scroll-snap-align:center; background:#000;
+}
+.lightbox__bar{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--s1);
+  padding:var(--s0) var(--s1); color:oklch(0.9 0 0); font-size:0.8125rem;
+  background:oklch(0.07 0 0);
+}
+.lightbox__bar b{font-weight:600; font-variant-numeric:tabular-nums}
+.lightbox__x, .lightbox__del{
+  width:36px; height:36px; border-radius:50%; cursor:pointer; flex:none;
+  background:oklch(1 0 0 / .12); border:1px solid oklch(1 0 0 / .2);
+  color:oklch(0.97 0 0); font-size:0.875rem;
+  display:grid; place-items:center;
+}
+.lightbox__x:hover{background:oklch(1 0 0 / .22)}
+.lightbox__del svg{width:19px; height:19px}
+/* destructive, so it stays quiet until you reach for it */
+.lightbox__del:hover{background:var(--accent); border-color:var(--accent)}
+.lightbox__del[hidden]{display:none}
+.lightbox__bar{gap:var(--s-1)}
+.lightbox__bar > span:first-child{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.slide__segs{
+  position:absolute; top:10px; left:10px; right:10px; z-index:3;
+  display:flex; gap:3px; pointer-events:none;
+}
+.slide__segs i{flex:1; height:2.5px; border-radius:99px; background:oklch(1 0 0 / .3)}
+.slide__segs i.on{background:oklch(1 0 0 / .95)}
+.slide__tapl, .slide__tapr{
+  position:absolute; top:0; bottom:0; width:33%; z-index:2;
+  background:none; border:none; cursor:pointer;
+}
+.slide__tapl{left:0} .slide__tapr{right:0}
+.slide__grad{
+  position:absolute; left:0; right:0; bottom:0; height:38%; z-index:1; pointer-events:none;
+  background:linear-gradient(to top, oklch(0.13 0.012 var(--h)) 2%, transparent);
+}
+.slide__count{
+  position:absolute; right:12px; top:20px; z-index:3;
+  font-size:0.6875rem; font-weight:600; color:oklch(1 0 0 / .85);
+  background:oklch(0 0 0 / .35); padding:2px 8px; border-radius:99px;
+}
+
+/* body */
+.slide__body{padding:0 var(--s2); margin-top:calc(var(--s2) * -1.5); position:relative; z-index:2}
+.slide__kind{font-size:0.6875rem; font-weight:600; color:var(--accent); margin-bottom:5px}
+.slide__name{
+  font-family:var(--display); font-optical-sizing:auto; font-weight:400;
+  font-size:1.75rem; line-height:1.1; letter-spacing:-.015em;
+  margin:0 0 4px; color:oklch(0.97 0.005 var(--h));
+}
+.slide__where{font-size:0.8125rem; color:oklch(0.72 0.01 var(--h)); margin-bottom:var(--s1)}
+.slide__price{
+  font-size:1.75rem; font-weight:700; line-height:1; letter-spacing:-.02em;
+  color:oklch(0.97 0.005 var(--h)); font-variant-numeric:tabular-nums;
+}
+.slide__price--none{font-size:0.9375rem; font-weight:400; font-style:italic; color:oklch(0.65 0.01 var(--h))}
+.slide__ppm{margin-top:5px; font-size:0.8125rem; font-weight:600; color:var(--accent)}
+
+.slide__stats{
+  display:flex; margin:var(--s1) 0 0; padding:var(--s0) 0;
+  border-top:1px solid oklch(1 0 0 / .12); border-bottom:1px solid oklch(1 0 0 / .12);
+}
+.slide__stats div{flex:1}
+.slide__stats dt{font-size:0.625rem; font-weight:600; color:oklch(0.62 0.01 var(--h)); margin:0 0 3px}
+.slide__stats dd{margin:0; font-size:0.9375rem; font-weight:600; color:oklch(0.95 0.005 var(--h))}
+
+/* the call to action */
+.slide__rate{margin-top:var(--s2); text-align:center}
+.slide__rate h3{
+  margin:0 0 var(--s0); font-size:0.75rem; font-weight:600;
+  color:oklch(0.72 0.01 var(--h));
+}
+.bigstars{display:flex; justify-content:center}
+.autostars--big{--star:38px; --gap:14px}
+.autostars--big .autostars__base{color:oklch(1 0 0 / .22)}
+.autostars--big .autostars__on{color:var(--accent)}
+.autostars--big .autostars__hit button::after{top:-9px; bottom:-9px; left:-7px; right:-7px}
+.slide__mine{margin-top:var(--s-1); font-size:0.6875rem; color:oklch(0.62 0.01 var(--h)); min-height:1.2em}
+.slide__theirs{
+  margin-top:var(--s1); display:flex; align-items:center; justify-content:center; gap:var(--s-1);
+  font-size:0.75rem; color:oklch(0.72 0.01 var(--h));
+}
+.slide__theirs .pips i{width:4px; height:11px; background:oklch(1 0 0 / .22)}
+.slide__theirs .pips i.f{background:var(--sam)}
+.slide__theirs .pips i.h{background:linear-gradient(oklch(1 0 0 / .22) 0 50%, var(--sam) 50% 100%)}
+
+/* locator */
+.slide__map{
+  margin-top:var(--s2); height:200px; border-radius:6px; overflow:hidden;
+  border:1px solid oklch(1 0 0 / .14); background:oklch(0.2 0.01 var(--h));
+}
+.slide__map .leaflet-container{background:oklch(0.2 0.01 var(--h)); touch-action:none}
+.slide__map .leaflet-bar{border-color:oklch(1 0 0 / .14) !important}
+.slide__map .leaflet-bar a{background:oklch(0.22 0.01 var(--h)) !important; color:oklch(0.92 0.005 var(--h)) !important;
+  border-bottom-color:oklch(1 0 0 / .14) !important}
+/* repères on the dark locator keep their own dark pill; the map behind is light, so it reads */
+.slide__map .poi{font-size:0.625rem; padding:3px 8px 3px 5px}
+.slide__meta{margin-top:var(--s0); font-size:0.75rem; color:oklch(0.68 0.01 var(--h)); line-height:1.6}
+.slide__meta a{color:var(--accent)}
+.slide__note{
+  margin-top:var(--s0); padding:var(--s-1) var(--s0); border-radius:4px;
+  background:oklch(1 0 0 / .06); font-size:0.8125rem; line-height:1.45;
+  color:oklch(0.82 0.008 var(--h));
+}
+.slide__note b{color:var(--who); font-size:0.6875rem; display:block; margin-bottom:2px}
+.slide__acts{display:flex; gap:var(--s-1); margin-top:var(--s1); flex-wrap:wrap}
+.slide__acts button, .slide__acts a{
+  padding:8px var(--s0); border-radius:99px; cursor:pointer; text-decoration:none;
+  background:oklch(1 0 0 / .08); border:1px solid oklch(1 0 0 / .16);
+  color:oklch(0.9 0.008 var(--h)); font-size:0.75rem; font-weight:500;
+}
+.slide__acts button:hover, .slide__acts a:hover{background:oklch(1 0 0 / .15)}
+
+/* chrome */
+.deck__x, .deck__arrow{
+  position:absolute; z-index:10; cursor:pointer; display:grid; place-items:center;
+  background:oklch(0 0 0 / .5); border:1px solid oklch(1 0 0 / .2);
+  color:oklch(0.97 0.005 var(--h)); border-radius:50%;
+  transition:background .16s;
+}
+.deck__x:hover, .deck__arrow:hover{background:oklch(0 0 0 / .8)}
+.deck__x{top:var(--s1); left:var(--s1); width:36px; height:36px; font-size:0.875rem}
+.deck__arrow{top:50%; transform:translateY(-50%); width:44px; height:44px; font-size:1.375rem}
+.deck__arrow--prev{left:var(--s1)}
+.deck__arrow--next{right:var(--s1)}
+@media (max-width:700px){
+  .deck__arrow{display:none}
+  .slide__body{padding:0 var(--s1)}
+}
+
+/* Wide screens: stop stranding a phone-shaped column in the middle of a
+   desktop. The photograph takes the left half at full height, the facts and
+   the rating sit in a fixed column on the right, always in view. */
+@media (min-width:900px){
+  .slide{align-items:stretch; justify-content:center; overflow:hidden}
+  /* No width cap: on a large screen the point is to see the house, so the
+     photograph takes everything the facts column does not need. */
+  .slide__inner{
+    max-width:none; width:100%; height:100%; padding:0;
+    display:grid; grid-template-columns:minmax(0,1fr) clamp(380px, 26vw, 460px);
+  }
+  .slide__shot{
+    aspect-ratio:auto; height:100%; min-height:0;
+    display:grid; grid-template-rows:minmax(0,1fr) auto;
+    background:oklch(0.09 0.006 var(--h));
+  }
+  .slide__gal{grid-row:1}
+  /* contain, not cover: a full-height pane crops the top and bottom off a
+     landscape photo, which is exactly the part of a house you want to see */
+  .slide__gal figure img{object-fit:contain}
+  .slide__grad{display:none}
+  .slide__segs{display:none}
+  .slide__count{right:auto; left:16px; top:16px}
+  .deck__x{left:auto; right:var(--s1)}
+  .slide__body{
+    margin-top:0; padding:var(--s3) var(--s2) var(--s4);
+    overflow-y:auto; overscroll-behavior:contain;
+    border-left:1px solid oklch(1 0 0 / .08);
+  }
+  .slide__name{font-size:2rem}
+  .slide__price{font-size:2rem}
+  .slide__map{height:220px}
+
+  /* a filmstrip, so the whole set is visible at once rather than one at a time */
+  .slide__thumbs{
+    grid-row:2; display:flex; gap:6px; padding:10px 12px;
+    overflow-x:auto; scrollbar-width:none;
+    background:oklch(0.11 0.006 var(--h)); border-top:1px solid oklch(1 0 0 / .08);
+  }
+  .slide__thumbs::-webkit-scrollbar{display:none}
+  .slide__thumbs button{
+    flex:0 0 auto; width:84px; height:58px; padding:0; cursor:pointer;
+    border:2px solid transparent; border-radius:4px; overflow:hidden;
+    background:oklch(0.2 0.01 var(--h)); opacity:.5;
+    transition:opacity .16s, border-color .16s;
+  }
+  .slide__thumbs button img{width:100%; height:100%; object-fit:cover; display:block}
+  .slide__thumbs button:hover{opacity:.85}
+  .slide__thumbs button.on{opacity:1; border-color:var(--accent)}
+}
+@media (max-width:899px){ .slide__thumbs{display:none} }
+
+/* ─────────────── connectivity ─────────────── */
+.wire{
+  position:fixed; z-index:4000; left:50%; bottom:var(--s1); transform:translateX(-50%);
+  display:flex; align-items:center; gap:var(--s-1); padding:7px var(--s0);
+  background:var(--ink); color:var(--paper); border-radius:99px; box-shadow:var(--shadow-2);
+  font-size:0.6875rem; font-weight:500;
+}
+.wire[hidden]{display:none}
+.wire i{width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none}
+
+/* ─────────────── phone ─────────────── */
+@media (max-width:860px){
+  .app{display:block; height:100dvh}
+  .rail, .map-wrap{grid-area:auto}
+  .map-wrap{position:fixed; inset:0}
+  /* Legend keeps the top-left; Leaflet's zoom buttons move to the top-right
+     so the two no longer stack on each other. Pinch still zooms. */
+  .key{bottom:auto; top:var(--s1); left:var(--s1); padding:var(--s-1) var(--s0)}
+  .key h2, .key__ends, .key__none{display:none}
+  .leaflet-top.leaflet-left{left:auto; right:0}
+  .leaflet-top.leaflet-left .leaflet-control{margin:var(--s1) var(--s1) 0 0}
+  .leaflet-bar a{width:40px !important; height:40px !important; line-height:40px !important; font-size:20px !important}
+  /* The drawer sits ABOVE the detail panel so its handle stays tappable even
+     when the panel is full-screen, and it can collapse to just that handle. */
+  .rail{
+    position:fixed; left:0; right:0; bottom:0; z-index:1300; height:88dvh;
+    border-right:none; border-top:1px solid var(--rule); border-radius:14px 14px 0 0;
+    box-shadow:var(--shadow-2); transform:translateY(var(--sheet, 60dvh));
+    transition:transform .34s cubic-bezier(.16,.84,.30,1); touch-action:none;
+  }
+  .rail.dragging{transition:none}
+  .grip{
+    display:block; width:100%; padding:14px 0 10px; background:none; border:none;
+    cursor:grab; touch-action:none; position:relative;
+  }
+  .grip::before{content:""; display:block; width:42px; height:5px; margin:0 auto; border-radius:99px; background:var(--rule)}
+  /* Leaflet's own controls sit at z-index 1000, which put the +/- buttons on
+     top of the detail panel. Panel goes above them; the map is behind it anyway. */
+  .sheet{z-index:1200}
+  /* clear the collapsed drawer handle so the last field is reachable */
+  .sheet__body{padding-bottom:84px}
+  .list{padding-bottom:24px}
+  /* The toolbar was pinned to the top-right corner and ran over the stats
+     line. On a phone it becomes its own row under the standfirst: browse and
+     add on the left, identity and theme on the right, all 40px tall. */
+  .masthead{padding:0 var(--s1) var(--s-1)}
+  h1{font-size:1.375rem}
+  .standfirst{max-width:none}
+  .mast__tools{margin-top:5px}
+  .icon-btn{width:38px; height:38px; font-size:1rem}
+  .browse-btn{padding:0 18px; min-height:40px}
+  .me{min-height:40px; padding:0 14px}
+  .controls{padding:0 var(--s1) var(--s-1)}
+  /* same row, a little tighter: the photo gives up what the figures need */
+  .card{grid-template-columns:104px minmax(0, 1fr); gap:var(--s-1)}
+  .price{font-size:1.0625rem}
+  .sheet{width:100%; border-left:none}
+  .rail-toggle{display:none}
+  /* While placing a point the panel must get out of the way, or there is no
+     map to click — it covers the whole screen at this width. It slides down
+     to a grab strip and comes back with the coordinates filled in. */
+  .placing .sheet.open{transform:translateY(calc(100% - 52px))}
+  .placing .sheet .sheet__scroll{overflow:hidden}
+  .placing .sheet__close{display:none}
+  .placing .sheet.open::before{
+    content:"Formulaire — clique sur la carte pour placer le point";
+    position:absolute; left:0; right:0; top:0; height:52px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.6875rem; font-weight:500; color:var(--ink-3);
+    background:var(--surface); border-top:1px solid var(--rule);
+    border-radius:14px 14px 0 0; z-index:3; padding:0 var(--s1); text-align:center;
+  }
+  .seg button, .chips button, .btn{min-height:36px}
+  /* the bottom drawer covers the last rows, so the table scrolls past it */
+  .tablewrap__scroll{padding-bottom:34dvh}
+  /* the toggle takes the top-right corner, so the zoom buttons drop below it */
+  .viewtog{top:var(--s-1); right:var(--s-1)}
+  .leaflet-top.leaflet-left .leaflet-control{margin:58px var(--s1) 0 0}
+  .map-wrap:has(.sheet.open) .viewtog{display:none}
+}
+@media (max-width:860px) and (prefers-reduced-motion:reduce){ .rail{transition:none} }
+</style>
+</head>
+<body>
+
+<!-- login -->
+<section class="gate" id="gate" hidden>
+  <div class="gate__card">
+    <h1>Les biens</h1>
+    <p>Notre carte partagée des maisons et terrains.</p>
+    <div class="who" id="who">
+      <button type="button" data-user="alex" aria-pressed="false" style="--who:var(--alex)">
+        <b>Alex</b><span>se connecter</span>
+      </button>
+      <button type="button" data-user="sam" aria-pressed="false" style="--who:var(--sam)">
+        <b>Sam</b><span>se connecter</span>
+      </button>
+      <button type="button" data-user="guest" aria-pressed="false" style="--who:var(--guest)">
+        <b>Invité</b><span>se connecter</span>
+      </button>
+    </div>
+    <form id="gateForm">
+      <label for="pw">Mot de passe</label>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••">
+      <button class="gate__go" id="gateGo" type="submit" disabled>Entrer</button>
+      <p class="gate__err" id="gateErr" role="alert"></p>
+    </form>
+  </div>
+</section>
+
+<!-- app -->
+<div class="app" id="app" hidden>
+  <aside class="rail" id="rail">
+    <button class="grip" id="grip" aria-label="Déplier ou replier la liste"></button>
+
+    <header class="masthead">
+      <div class="mast__row">
+        <div class="mast__id">
+          <h1>Les biens</h1>
+          <p class="standfirst" id="standfirst"></p>
+        </div>
+        <div class="mast__tools">
+          <button class="browse-btn" id="browse" title="Parcourir les biens un par un">Parcourir</button>
+          <button class="icon-btn" id="addPoi" aria-label="Ajouter un repère" title="Ajouter un repère (école, commerces…)">◎</button>
+          <button class="icon-btn" id="add" aria-label="Ajouter un bien" title="Ajouter un bien">+</button>
+          <button class="me" id="me" title="Changer d'utilisateur"></button>
+          <button class="icon-btn" id="theme" aria-label="Basculer clair et sombre">◑</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="selects">
+        <label class="sel">
+          <span>Type</span>
+          <select id="kind">
+            <option value="all">Tout</option>
+            <option value="property">Maisons</option>
+            <option value="land">Terrains</option>
+          </select>
+        </label>
+        <label class="sel">
+          <span>Sélection</span>
+          <select id="view">
+            <option value="all">Tous</option>
+            <option value="mine">Ma liste</option>
+            <option value="theirs">Sa liste</option>
+            <option value="both">Commune</option>
+            <option value="hidden">Masqués</option>
+          </select>
+        </label>
+        <label class="sel">
+          <span>Commune</span>
+          <select id="town"></select>
+        </label>
+      </div>
+
+      <details class="more" id="more">
+        <summary>Plus de filtres</summary>
+        <div class="more__body">
+          <div class="field">
+            <label class="lab" for="q">Recherche</label>
+            <input class="search" id="q" type="search" placeholder="rue, note…" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="lab" for="maxPrice">Budget maximum <b id="maxPriceOut"></b></label>
+            <div class="hist" id="hist" aria-hidden="true"></div>
+            <input id="maxPrice" type="range" min="0" max="100" value="100">
+          </div>
+          <div class="field">
+            <label class="lab" for="minSurface">Surface minimum <b id="minSurfaceOut"></b></label>
+            <input id="minSurface" type="range" min="0" max="100" value="0">
+          </div>
+          <div class="field">
+            <span class="lab" id="sortLab">Trier</span>
+            <nav class="sorts" id="sorts" aria-labelledby="sortLab">
+              <button data-sort="score" aria-pressed="true">Note</button>
+              <button data-sort="total" aria-pressed="false">Total</button>
+              <button data-sort="price" aria-pressed="false">Prix</button>
+              <button data-sort="surface" aria-pressed="false">Surface</button>
+              <button data-sort="ppm" aria-pressed="false">€ / m²</button>
+              <button data-sort="name" aria-pressed="false">Adresse</button>
+            </nav>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <ol class="list" id="list"></ol>
+  </aside>
+
+  <main class="map-wrap">
+    <div id="map"></div>
+    <section class="tablewrap" id="tablewrap" hidden aria-label="Tableau des biens"></section>
+    <section class="dashwrap" id="dashwrap" hidden aria-label="Tableau de bord"></section>
+    <nav class="viewtog" id="viewtog" aria-label="Vue">
+      <button type="button" data-v="dash" aria-pressed="false">Dash</button>
+      <button type="button" data-v="map" aria-pressed="true">Carte</button>
+      <button type="button" data-v="table" aria-pressed="false">Tableau</button>
+    </nav>
+    <button class="rail-toggle" id="railToggle" aria-expanded="true"
+            aria-controls="rail" title="Replier le panneau (touche \\)">‹</button>
+    <section class="key" id="key" aria-label="Échelle des couleurs"></section>
+    <div class="hint" id="hint" hidden>
+      <span id="hintTxt"></span><button type="button" id="hintCancel">annuler</button>
+    </div>
+    <aside class="sheet" id="sheet" aria-live="polite"></aside>
+  </main>
+</div>
+
+<section class="poidlg" id="poidlg" hidden aria-label="Nouveau repère">
+  <form class="poidlg__card" id="poiForm">
+    <h2 id="poiTitle">Nouveau repère</h2>
+    <label for="poiName">Nom</label>
+    <input id="poiName" maxlength="80" placeholder="École, boulangerie, bureau…" autocomplete="off">
+    <span class="poidlg__lab">Icône</span>
+    <div class="poidlg__icons" id="poiIcons"></div>
+    <div class="poidlg__acts">
+      <button class="btn btn--go" type="submit">Enregistrer</button>
+      <button class="btn" type="button" id="poiCancel">Annuler</button>
+      <button class="btn btn--warn" type="button" id="poiDelete" hidden>Supprimer</button>
+    </div>
+  </form>
+</section>
+
+<section class="deck" id="deck" hidden aria-label="Parcourir les biens">
+  <div class="deck__stage" id="deckStage"></div>
+  <button class="deck__x" id="deckX" aria-label="Fermer">✕</button>
+  <button class="deck__arrow deck__arrow--prev" id="deckPrev" aria-label="Bien précédent">‹</button>
+  <button class="deck__arrow deck__arrow--next" id="deckNext" aria-label="Bien suivant">›</button>
+</section>
+
+<section class="lightbox" id="lightbox" hidden aria-label="Photo en plein écran">
+  <div class="lightbox__strip" id="lbStrip"></div>
+  <div class="lightbox__bar">
+    <span id="lbCaption"></span>
+    <b id="lbCount"></b>
+    <button class="lightbox__del" id="lbDel" aria-label="Supprimer cette photo" title="Supprimer cette photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </button>
+    <button class="lightbox__x" id="lbX" aria-label="Fermer">✕</button>
+  </div>
+</section>
+
+<div class="wire" id="wire" hidden><i></i><span id="wireTxt"></span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

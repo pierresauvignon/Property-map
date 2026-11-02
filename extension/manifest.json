@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Property Map — sur les annonces",
+  "description": "Sur une annonce déjà dans Property Map : nos notes, la visite, les commentaires, et un lien vers la fiche.",
+  "version": "1.10",
+  "host_permissions": ["https://your-app.example.com/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": [
+      "https://www.seloger.com/*",
+      "https://www.bellesdemeures.com/*",
+      "https://www.leboncoin.fr/*",
+      "https://www.laforet.com/*"
+    ],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }]
+}

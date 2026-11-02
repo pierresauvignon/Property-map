@@ -1,0 +1,11 @@
+{
+  "name": "property-map-tools",
+  "private": true,
+  "type": "module",
+  "description": "Local-only tooling (seeding). The Lambda uses the runtime's bundled SDK; nothing here is deployed.",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/client-s3": "^3.1130.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0"
+  }
+}
