@@ -10,6 +10,22 @@ and it reads adverts from the French portals: SeLoger, Leboncoin, Belles
 Demeures and Laforêt. The map, scoring and sharing work anywhere. Only the
 import from listing pages is specific to those sites.
 
+![The map, with the shortlist on the left and pins coloured by price per m²](docs/screenshots/map.jpg)
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/property.jpg" alt="A property's panel: listing photos, price, surfaces, energy letters and visits"></td>
+    <td><img src="docs/screenshots/scores.jpg" alt="Each person's mark, the shared location mark, the three derived marks and the total"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/table.jpg" alt="The table view: every property with its marks, sortable by any column"></td>
+    <td><img src="docs/screenshots/dashboard.jpg" alt="The dashboard: counts, the top properties by total, and the latest comments"></td>
+  </tr>
+</table>
+
+*Screenshots from the original deployment. Its two editors were Pierre and
+Marie, where this code says Alex and Sam.*
+
 ## What it does
 
 - **Map and table** of every property, with pins coloured by price per m² or
