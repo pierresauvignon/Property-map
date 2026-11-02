@@ -51,6 +51,16 @@ Marie, where this code says Alex and Sam.*
   your marks, comments and visit in a card in the corner. On a results page it
   flags every advert you already have, including ones re-listed by another
   agency.
+
+  ![The extension's card on a SeLoger advert: the spot on a map, both marks, the visit and the latest comments](docs/screenshots/extension-card.jpg)
+
+  <table>
+    <tr>
+      <td><img src="docs/screenshots/extension-maybe.jpg" alt="A results page: a dashed tab suggests this advert may be a property already in the list, re-listed by another agency"></td>
+      <td><img src="docs/screenshots/extension-set-aside.jpg" alt="A results page: a property already in the list and set aside, dimmed and tagged ÉCARTÉ with both marks"></td>
+    </tr>
+  </table>
+
 - **Email** to the other person when you comment, add a property or upload
   files (optional, via Amazon SES).
 - **Works on a bad connection.** The app shell, the data and the map tiles
